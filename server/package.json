@@ -1,0 +1,17 @@
+{
+  "name": "seabattle_server",
+  "version": "1.0.0",
+  "description": "This is server side of \"Sea battle\" application",
+  "main": "index.js",
+  "scripts": {
+    "dev":"ts-node-dev src/index.ts",
+    "build":"tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Alex24",
+  "license": "ISC",
+  "devDependencies": {
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.0.4"
+  }
+}
