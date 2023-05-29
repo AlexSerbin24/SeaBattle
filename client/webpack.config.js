@@ -1,6 +1,6 @@
 import { fileURLToPath } from 'url';
 import path, { dirname } from 'path';
-
+import HtmlWebpackPlugin from 'html-webpack-plugin';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
@@ -31,6 +31,20 @@ export default {
             }
         ]
 
+    },
+
+    plugins:[
+        new HtmlWebpackPlugin({
+            template:"./src/index.html"
+        })
+    ],
+
+    devServer:{
+        static:{
+            directory:path.join(__dirname,"dist")
+        },
+        port:3000,
+        hot:true
     }
 
 }
