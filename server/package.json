@@ -4,7 +4,7 @@
   "description": "This is server side of \"Sea battle\" application",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon src/index.ts",
+    "dev": "nodemon --esm src/index.ts",
     "build": "tsc"
   },
   "type": "module",
@@ -17,7 +17,9 @@
     "typescript": "^5.0.4"
   },
   "dependencies": {
+    "dotenv": "^16.0.3",
     "express": "^4.18.2",
+    "mysql2": "^3.3.3",
     "socket.io": "^4.6.1"
   }
 }
