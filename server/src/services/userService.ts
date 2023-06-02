@@ -1,7 +1,7 @@
-import UserData from "../types/userData";
-import User from "../models/user";
+import UserData from "../types/userData.js";
+import User from "../models/user.js";
 import bcrypt from "bcrypt";
-import TokenService from "./tokenService";
+import TokenService from "./tokenService.js";
 
 export default class UserService {
     static async register(registerData: Omit<UserData, "trophies">) {
@@ -16,6 +16,7 @@ export default class UserService {
 
         const userData = {email:newUser.email, username:newUser.username, trophies:newUser.trophies};
         const tokens =  TokenService.generateTokens(userData);
+        console.log(tokens);
         await TokenService.saveToken(newUser.id,tokens.refreshToken);
         return {...tokens,...userData}
 

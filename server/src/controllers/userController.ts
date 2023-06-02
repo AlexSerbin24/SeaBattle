@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import UserService from "../services/userService";
-import UserData from "../types/userData";
+import UserService from "../services/userService.js";
+import UserData from "../types/userData.js";
 
 export default class UserController {
     static async login(req: Request, res: Response) {
@@ -17,11 +17,13 @@ export default class UserController {
 
     static async register(req: Request, res: Response) {
         try {
+            console.log(req)
             const registerData = req.body as Omit<UserData, "trophies">
             const { refreshToken, ...result } = await UserService.register(registerData);
             res.cookie("refreshToken", refreshToken, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true });
             res.send(result);
         } catch (error) {
+            console.log(error);
             res.send((error as Error).message);
         }
     }
@@ -30,6 +32,7 @@ export default class UserController {
         try {
             const {refreshToken} = req.cookies;
             await UserService.logout(refreshToken as string);
+            res.send({message:"Logout was succeed"})
         } catch (error) {
             res.send((error as Error).message);
         }

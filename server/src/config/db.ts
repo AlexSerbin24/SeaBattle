@@ -1,5 +1,7 @@
 import { Sequelize } from "sequelize";
+import dotenv from "dotenv";
 
+dotenv.config();
 
 export const sequelize = new Sequelize({
     database:process.env.DB_DATABASE,
@@ -8,6 +10,8 @@ export const sequelize = new Sequelize({
     password:process.env.DB_PASSWORD,
     dialect:"mysql"
 })
+
+console.log(process.env.DB_DATABASE)
 
 export default async function connectionToDb(){
     try {

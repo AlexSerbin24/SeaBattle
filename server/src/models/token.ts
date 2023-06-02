@@ -1,6 +1,6 @@
-import { sequelize } from "../config/db";
+import { sequelize } from "../config/db.js";
 import { DataTypes, Model, CreationOptional, ForeignKey} from "sequelize";
-import User from "./user";
+import User from "./user.js";
 
 
 class Token extends Model{
@@ -21,7 +21,7 @@ Token.init( {
     }
 }, {sequelize});
 
-Token.hasOne(User,{
+Token.belongsTo(User,{
     foreignKey:"userId"
 })
 

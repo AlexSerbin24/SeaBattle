@@ -1,6 +1,6 @@
 import jsonwebtoken from "jsonwebtoken";
-import UserData from "../types/userData";
-import Token from "../models/token";
+import UserData from "../types/userData.js";
+import Token from "../models/token.js";
 
 export default class TokenService{
     static  generateTokens(userData:Omit<UserData,"password">){
