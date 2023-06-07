@@ -11,10 +11,10 @@ import userRouter from "./routes/userRoutes.js";
 dotenv.config();
 
 const app = express();
-// app.use(bodyParser.json())
-// app.use(cookieParser());
-// app.use(cors())
-// app.use("/user",userRouter);
+app.use(bodyParser.json())
+app.use(cookieParser());
+app.use(cors())
+app.use("/user",userRouter);
 const server = http.createServer(app);
 
 
