@@ -11,8 +11,6 @@ export const sequelize = new Sequelize({
     dialect:"mysql"
 })
 
-console.log(process.env.DB_DATABASE)
-
 export default async function connectionToDb(){
     try {
         await sequelize.sync();
