@@ -6,45 +6,69 @@ const __dirname = dirname(__filename);
 
 
 export default {
-    mode:"development",
+    mode: "development",
     entry: "./src/index.tsx",
-    output:{
-        path:path.resolve(__dirname, "dist"),
-        filename:"bundle.js"
+    output: {
+        path: path.resolve(__dirname, "dist"),
+        filename: "bundle.js"
     },
 
-    resolve:{
-        extensions:[".js",".jsx",".ts",".tsx"]
+    resolve: {
+        extensions: [".js", ".jsx", ".ts", ".tsx"]
     },
 
-    module:{
-        rules:[
+    module: {
+        rules: [
+
             {
-                test:/\.(ts|tsx)$/,
-                exclude:/node_modules/,
-                use:"ts-loader"
+                test: /\.css$/,
+                exclude: /\.module\.css$/,
+                use: [
+                    'style-loader',
+                    'css-loader'
+                ],
+            },
+
+            {
+                test: /\.module\.css$/,
+                use: [
+                    'style-loader',
+                    {
+                        loader: 'css-loader',
+                        options: {
+                            modules: {
+                                localIdentName: '[name]__[local]--[hash:base64:5]',
+                            },
+                        },
+                    },
+                ],
             },
             {
-                test:/\.(js|jsx)$/,
+                test: /\.(ts|tsx)$/,
                 exclude: /node_modules/,
-                use:"babel-loader"
+                use: "ts-loader"
+            },
+            {
+                test: /\.(js|jsx)$/,
+                exclude: /node_modules/,
+                use: "babel-loader"
             }
         ]
 
     },
 
-    plugins:[
+    plugins: [
         new HtmlWebpackPlugin({
-            template:"./src/index.html"
+            template: "./src/index.html"
         })
     ],
 
-    devServer:{
-        static:{
-            directory:path.join(__dirname,"dist")
+    devServer: {
+        static: {
+            directory: path.join(__dirname, "dist")
         },
-        port:3000,
-        hot:true
+        port: 3000,
+        hot: true
     }
 
 }
