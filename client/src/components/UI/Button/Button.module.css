@@ -2,5 +2,10 @@
     border: 0;
     padding: 12px 14px;
     font-size: 24px;
+    color: white;
     cursor: pointer;
+}
+
+.app-button:hover, .app-button:disabled{
+    opacity: 0.5;
 }

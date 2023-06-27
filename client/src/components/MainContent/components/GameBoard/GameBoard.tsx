@@ -1,19 +1,19 @@
-import React from 'react'
+import React, { forwardRef, ForwardedRef } from 'react'
 
 
 type Props = {
     isEnemyField: boolean,
 
 }
-export default function GameBoard({ isEnemyField }: Props) {
+const  GameBoard = forwardRef(({isEnemyField}:Props, ref:ForwardedRef<HTMLTableElement> )=> {
     const boardLines = Array.from({ length: 10 }, (r, rowIndex) =>
-        <tr className='board-row'>
+        <tr key={`row${rowIndex}`} className='board-row'>
             {
                 <>
                     <th>{rowIndex + 1}</th>
                     {
                         Array.from({ length: 10 }, (c, columnIndex) =>
-                            <td className='board-square' key={`${rowIndex};${columnIndex}`}></td>
+                            <td  className='board-square' key={`${rowIndex};${columnIndex}`}></td>
                         )
                     }
                 </>
@@ -23,7 +23,7 @@ export default function GameBoard({ isEnemyField }: Props) {
 
     return (
         <div>
-            <table className='board'>
+            <table ref={ref} className='board'>
                 <tr>
                     <th></th>
                     <th>A</th>
@@ -39,11 +39,9 @@ export default function GameBoard({ isEnemyField }: Props) {
                 </tr>
                 {boardLines}
             </table>
-            <p style={{ textAlign: "center" }}>
-                Your board.
-                <br/>
-                Arrange the ships that are available below.
-            </p>
+
         </div>
     )
-}
+});
+
+export default GameBoard;
