@@ -15,10 +15,18 @@ import {
 } from '../../utils/shipsDefaultProperties'
 
 import UpdatedShip from '../../types/UpdatedShip'
+import LoginModal from './components/Modals/LoginModal'
+import RegisterModal from './components/Modals/RegisterModal'
+import User from '../../types/User'
+import UserService from '../../services/UserService'
+import { AxiosError } from 'axios'
 
 export default function MainContent() {
   const gameBoardRef = useRef<HTMLTableElement>(null);
+  const [isRegisterModalVisible, setIsRegisterModalVisible ] = useState(false);
+  const [isLoginModalVisible, setIsLoginModalVisible] = useState(false)
   const [isEditMode, setIsEditMode] = useState(false);
+  const [user, setUser] = useState<User | null>(null)
   const [isGameStarted, setIsGameStarted] = useState(false);
   const [ships, setShips] = useState<ShipsState>({
     largeShips: [
@@ -74,6 +82,11 @@ export default function MainContent() {
         return updatedShips;
       })
     }
+    UserService.refresh().then((data)=>{
+      const {accessToken, ...user} = data;
+      localStorage.setItem("token",accessToken);
+      setUser(user);
+    }).catch((error:AxiosError)=>console.log(error) /*TODO: handle expception*/)
   }, []);
 
   const editShipsButtonClickHandler = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -96,6 +109,8 @@ export default function MainContent() {
   return (
     <Container className='main-container'>
       <main>
+        <RegisterModal isRegisterModalVisible={isRegisterModalVisible} setUser={setUser} setIsRegisterModalVisible={setIsRegisterModalVisible}/>
+        <LoginModal isLoginModalVisible={isLoginModalVisible} setUser={setUser} setIsLoginModalVisible={setIsLoginModalVisible}/>
         <div>
           <Ships isEditMode={isEditMode} allowedShips={ships} isGameStarted={isGameStarted} updateShip={updateShipById} />
           <GameBoard ref={gameBoardRef} isEnemyField />
@@ -105,7 +120,7 @@ export default function MainContent() {
             <Button onClick={editShipsButtonClickHandler} className='edit-ships-btn'>Edit ships placements</Button>
           }
         </div>
-        <Menu user={{ email: "a", username: "a" }} />
+        <Menu user={user} setUser={setUser} setIsRegisterModalVisible={setIsRegisterModalVisible}  setIsLoginModalVisible={setIsLoginModalVisible}/>
       </main>
     </Container>
   )

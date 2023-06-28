@@ -10,7 +10,7 @@ export default class UserController {
             res.cookie("refreshToken", refreshToken, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true });
             res.send(result);
         } catch (error) {
-            res.send((error as Error).message);
+            res.status(400).send((error as Error).message);
         }
 
     }
@@ -24,7 +24,7 @@ export default class UserController {
             res.send(result);
         } catch (error) {
             console.log(error);
-            res.send((error as Error).message);
+            res.status(400).send((error as Error).message);
         }
     }
 
@@ -34,7 +34,7 @@ export default class UserController {
             await UserService.logout(refreshToken as string);
             res.send({message:"Logout was succeed"})
         } catch (error) {
-            res.send((error as Error).message);
+            res.status(400).send((error as Error).message);
         }
     }
 
@@ -46,7 +46,7 @@ export default class UserController {
             res.send(result);
 
         } catch (error) {
-            res.send((error as Error).message);
+            res.status(400).send((error as Error).message);
         }
     }
 }

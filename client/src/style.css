@@ -1,170 +1,191 @@
-#root{
-    /* display: flex;
-    flex-direction: column; */
-    font-family: Arial, Helvetica, sans-serif;
-    height: 100vh;
-    max-height: 100vh;
+#root {
+  display: flex;
+  flex-direction: column;
+  font-family: Arial, Helvetica, sans-serif;
+  height: 100vh;
 }
 
 body {
-    width: 100vw;
-    min-height: 100%;
-    padding: 0;
-    margin: 0;
-    overflow-x: hidden;
+  padding: 0;
+  margin: 0;
+  overflow-x: hidden;
 }
 
-main{
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-}
 
 /* header */
 header {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    height: 100px;
-    font-size: 30px;
-    color: white;
-    background: rgb(2,0,36);
-    background: linear-gradient(90deg, rgba(2,0,36,1) 0%, rgba(30,30,153,1) 0%, rgba(0,196,255,1) 100%);
-    box-shadow: 0 0 2px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  font-size: 30px;
+  color: white;
+  background: rgb(2, 0, 36);
+  background: linear-gradient(90deg, rgba(2, 0, 36, 1) 0%, rgba(30, 30, 153, 1) 0%, rgba(0, 196, 255, 1) 100%);
+  box-shadow: 0 0 2px;
+}
+
+/*User forms*/
+.user-form label {
+  margin-bottom: 15px;
+  font-size: 20px;
+}
+
+.user-form input {
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.user-form label,
+.user-form input {
+  display: block;
+}
+
+.user-form button {
+  background: rgb(77, 90, 243);
+  background: linear-gradient(176deg, rgba(77, 90, 243, 1) 0%, rgba(115, 168, 255, 1) 100%);
+}
+
+.error{
+  color: #eb5f5f
 }
 
 /*Main*/
 
-main{
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: baseline;
-    background-color: white;
-    height: 100%;
-    padding:3pc 3pc 0;
+main {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: baseline;
+  background-color: white;
+  height: 100%;
+  padding: 3pc 3pc 0;
 }
 
-.main-container{
-    background-color: rgb(248, 248, 248);
-    height: 100%;
+.main-container {
+  background-color: rgb(248, 248, 248);
+  flex: 1;
 }
 
 /*Menu*/
 
 .menu {
-    display: flex;
-    flex-direction: column;
-    margin-right: 16pc;
+  display: flex;
+  flex-direction: column;
+  margin-right: 16pc;
 }
 
 .menu>* {
-    margin-bottom: 8px;
+  margin-bottom: 8px;
 }
 
 
 /*Game board*/
-.board{
-    width: 495px;
-    height: 506px;
-    border-collapse: collapse;
-    margin-bottom: 10px;
+.board {
+  width: 495px;
+  height: 506px;
+  border-collapse: collapse;
+  margin-bottom: 10px;
 }
 
-.board th, .board td{
-    width: 45px;
-    height: 46px;
-    box-sizing: border-box;
+.board th,
+.board td {
+  width: 45px;
+  height: 46px;
+  box-sizing: border-box;
 }
 
-.board-square{
-    border: 1px solid rgb(19, 150, 193);
+.board-square {
+  border: 1px solid rgb(19, 150, 193);
 }
 
 /*Ships*/
 
-.ship{
-    border: 2px solid rgb(72, 72, 251);
-    background: rgb(195, 208, 228);
-    height: 46px;
-    box-sizing: border-box;
-    cursor:move;
+.ship {
+  border: 2px solid rgb(72, 72, 251);
+  background: rgb(195, 208, 228);
+  height: 46px;
+  box-sizing: border-box;
+  cursor: move;
 }
 
 
-.ship-place-found{
-    border: 2px solid rgb(67, 125, 67);
-    background: rgb(121, 245, 110);
+.ship-place-found {
+  border: 2px solid rgb(67, 125, 67);
+  background: rgb(121, 245, 110);
 }
 
-.ship-placement{
-    border: 1px dashed  rgb(162, 161, 161);
-    box-sizing: border-box;
-    position: relative;
+.ships-placements{
+  margin-bottom: 20px;
 }
 
-.ship-placement-row{
-    height: 46px;
-    display: flex;
-    flex-direction: row;
-    gap: 30px;
-    margin-bottom: 10px;
+.ship-placement {
+  border: 1px dashed rgb(162, 161, 161);
+  box-sizing: border-box;
+  position: relative;
+}
+
+.ship-placement-row {
+  height: 46px;
+  display: flex;
+  flex-direction: row;
+  gap: 30px;
+  margin-bottom: 10px;
 }
 
 
 
-.draggable{
-    position: absolute;
-    user-select: none;
-    z-index: 1000;
+.draggable {
+  position: absolute;
+  user-select: none;
+  z-index: 1000;
 }
 
 /*Footer*/
-footer{
-    padding: 12px;
-    text-align: center;
-    font-size: 18px;
-    color: white;
-    background: rgb(104,154,225);
-    background: linear-gradient(90deg, rgba(104,154,225,1) 0%, rgba(13,94,200,1) 100%);
+footer {
+  align-items: end;
+  padding: 12px;
+  text-align: center;
+  font-size: 18px;
+  color: white;
+  background: rgb(104, 154, 225);
+  background: linear-gradient(90deg, rgba(104, 154, 225, 1) 0%, rgba(13, 94, 200, 1) 100%);
 }
 
 
 /* Buttons */
-  .singleplayer-btn {
-    background: linear-gradient(4deg, rgba(34, 195, 103, 1) 0%, rgba(253, 187, 45, 1) 100%);
-  }
-  
-  .multiplayer-btn {
-    background: linear-gradient(180deg, rgba(182, 17, 17, 1) 5%, rgba(234, 163, 63, 1) 100%);
-  }
-  
-  .login-btn {
-    background: linear-gradient(0deg, rgba(133, 217, 250, 1) 0%, rgba(148, 187, 233, 1) 100%);
-  }
-  
-  .register-btn {
-    background: linear-gradient(0deg, rgba(144, 170, 177, 1) 0%, rgba(179, 186, 195, 1) 100%);
-  }
-  
-  .logout-btn,
-  .reset-ships-btn {
-    background: linear-gradient(176deg, rgba(243, 77, 77, 1) 0%, rgba(225, 104, 104, 1) 100%);
-  }
-  
-  .save-ships-btn {
-    background: linear-gradient(176deg, rgba(243, 77, 77, 1) 0%, rgba(109, 104, 225, 1) 44%);
-    margin-right: 10px;
-  }
-  
-  .save-ships-btn:disabled {
-    opacity: 0.5;
-  }
-  
-  .edit-ships-btn {
-    background: rgb(77,90,243);
-    background: linear-gradient(176deg, rgba(77,90,243,1) 0%, rgba(115,168,255,1) 100%);
-  }
+.singleplayer-btn {
+  background: linear-gradient(4deg, rgba(34, 195, 103, 1) 0%, rgba(253, 187, 45, 1) 100%);
+}
+
+.multiplayer-btn {
+  background: linear-gradient(180deg, rgba(182, 17, 17, 1) 5%, rgba(234, 163, 63, 1) 100%);
+}
+
+.login-btn {
+  background: linear-gradient(0deg, rgba(133, 217, 250, 1) 0%, rgba(148, 187, 233, 1) 100%);
+}
+
+.register-btn {
+  background: linear-gradient(0deg, rgba(144, 170, 177, 1) 0%, rgba(179, 186, 195, 1) 100%);
+}
+
+.logout-btn,
+.reset-ships-btn {
+  background: linear-gradient(176deg, rgba(243, 77, 77, 1) 0%, rgba(225, 104, 104, 1) 100%);
+}
+
+.save-ships-btn {
+  background: linear-gradient(176deg, rgba(243, 77, 77, 1) 0%, rgba(109, 104, 225, 1) 44%);
+  margin-right: 10px;
+}
+
+.save-ships-btn:disabled {
+  opacity: 0.5;
+}
+
+.edit-ships-btn {
+  background: rgb(77, 90, 243);
+  background: linear-gradient(176deg, rgba(77, 90, 243, 1) 0%, rgba(115, 168, 255, 1) 100%);
+}

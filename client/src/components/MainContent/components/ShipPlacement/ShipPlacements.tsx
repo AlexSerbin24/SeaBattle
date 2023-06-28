@@ -56,7 +56,7 @@ export default function ShipPlacements({ allowedShips, updateShip, setEditMode }
     };
 
     return (
-        <div>
+        <div className='ships-placements'>
             <p style={{ textAlign: "center" }}>
                 Your board.
                 <br />

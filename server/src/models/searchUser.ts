@@ -10,7 +10,7 @@ class SearchUser extends Model{
 
 SearchUser.init({
     id:{
-        type:DataTypes.NUMBER,
+        type:DataTypes.INTEGER,
         primaryKey:true,
         autoIncrement:true
     },
@@ -23,7 +23,7 @@ SearchUser.init({
         allowNull:true
     },
     trophies:{
-        type:DataTypes.NUMBER,
+        type:DataTypes.INTEGER,
         allowNull:false
     }
 }, {sequelize});
