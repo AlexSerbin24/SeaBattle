@@ -39,7 +39,6 @@ const  GameBoard = forwardRef(({isEnemyField}:Props, ref:ForwardedRef<HTMLTableE
                 </tr>
                 {boardLines}
             </table>
-
         </div>
     )
 });

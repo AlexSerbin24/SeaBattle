@@ -20,14 +20,21 @@ import RegisterModal from './components/Modals/RegisterModal'
 import User from '../../types/User'
 import UserService from '../../services/UserService'
 import { AxiosError } from 'axios'
+import Game from '../../types/Game'
+import useSocket from '../../hooks/useSocket'
+import Loader from '../UI/Loader/Loader'
+
 
 export default function MainContent() {
+  const webSocket = useSocket();
   const gameBoardRef = useRef<HTMLTableElement>(null);
-  const [isRegisterModalVisible, setIsRegisterModalVisible ] = useState(false);
+  const enemyGameBoardRef = useRef<HTMLTableElement>(null);
+  const [loading, setLoading] = useState(false);
+  const [isRegisterModalVisible, setIsRegisterModalVisible] = useState(false);
   const [isLoginModalVisible, setIsLoginModalVisible] = useState(false)
   const [isEditMode, setIsEditMode] = useState(false);
   const [user, setUser] = useState<User | null>(null)
-  const [isGameStarted, setIsGameStarted] = useState(false);
+  const [game, setGame] = useState<Game>({ isGameStated: false, gameOptions: null });
   const [ships, setShips] = useState<ShipsState>({
     largeShips: [
       { id: 1, coordinates: { x: 0, y: 0 }, placement: { x: 0, y: 0 }, isRotated: false }
@@ -82,11 +89,11 @@ export default function MainContent() {
         return updatedShips;
       })
     }
-    UserService.refresh().then((data)=>{
-      const {accessToken, ...user} = data;
-      localStorage.setItem("token",accessToken);
+    UserService.refresh().then((data) => {
+      const { accessToken, ...user } = data;
+      localStorage.setItem("token", accessToken);
       setUser(user);
-    }).catch((error:AxiosError)=>console.log(error) /*TODO: handle expception*/)
+    }).catch((error: AxiosError) => console.log(error) /*TODO: handle expception*/);
   }, []);
 
   const editShipsButtonClickHandler = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -108,19 +115,32 @@ export default function MainContent() {
 
   return (
     <Container className='main-container'>
+      <Loader loading={loading}/>
       <main>
-        <RegisterModal isRegisterModalVisible={isRegisterModalVisible} setUser={setUser} setIsRegisterModalVisible={setIsRegisterModalVisible}/>
-        <LoginModal isLoginModalVisible={isLoginModalVisible} setUser={setUser} setIsLoginModalVisible={setIsLoginModalVisible}/>
+        <RegisterModal setLoading={setLoading} isRegisterModalVisible={isRegisterModalVisible} setUser={setUser} setIsRegisterModalVisible={setIsRegisterModalVisible} />
+        <LoginModal setLoading={setLoading}  isLoginModalVisible={isLoginModalVisible} setUser={setUser} setIsLoginModalVisible={setIsLoginModalVisible} />
         <div>
-          <Ships isEditMode={isEditMode} allowedShips={ships} isGameStarted={isGameStarted} updateShip={updateShipById} />
-          <GameBoard ref={gameBoardRef} isEnemyField />
-          {isEditMode ?
-            <ShipPlacements allowedShips={ships} updateShip={updateShipById} setEditMode={setIsEditMode} />
+          <Ships isEditMode={isEditMode} allowedShips={ships} isGameStarted={game.isGameStated} updateShip={updateShipById} />
+          <GameBoard ref={gameBoardRef} isEnemyField={false} />
+          {!game.isGameStated ? (
+            isEditMode ?
+              <ShipPlacements allowedShips={ships} updateShip={updateShipById} setEditMode={setIsEditMode} />
+              :
+              <Button onClick={editShipsButtonClickHandler} className='edit-ships-btn'>Edit ships placements</Button>
+          )
             :
-            <Button onClick={editShipsButtonClickHandler} className='edit-ships-btn'>Edit ships placements</Button>
+            <h3 style={{textAlign:"center"}}>{user?.username}</h3>
           }
         </div>
-        <Menu user={user} setUser={setUser} setIsRegisterModalVisible={setIsRegisterModalVisible}  setIsLoginModalVisible={setIsLoginModalVisible}/>
+
+        {game.isGameStated ?
+          <div>
+            <GameBoard ref={enemyGameBoardRef} isEnemyField={true} />
+            <h3 style={{textAlign:"center"}}>{game.gameOptions?.opponent}</h3>
+          </div>
+          :
+          <Menu setLoading={setLoading}  user={user} setUser={setUser} setGame={setGame} setIsRegisterModalVisible={setIsRegisterModalVisible} setIsLoginModalVisible={setIsLoginModalVisible} />
+        }
       </main>
     </Container>
   )

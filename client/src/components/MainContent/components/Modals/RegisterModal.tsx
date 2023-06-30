@@ -10,15 +10,17 @@ import { AxiosError } from 'axios';
 
 type Props = {
     isRegisterModalVisible: boolean,
+    setLoading:React.Dispatch<React.SetStateAction<boolean>>,
     setUser: React.Dispatch<React.SetStateAction<User | null>>,
     setIsRegisterModalVisible: React.Dispatch<React.SetStateAction<boolean>>
 }
-export default function RegisterModal({ isRegisterModalVisible, setUser, setIsRegisterModalVisible }: Props) {
+export default function RegisterModal({ isRegisterModalVisible, setUser, setLoading, setIsRegisterModalVisible }: Props) {
     const [registerData, setRegisterData] = useState<RegisterData>({ email: "", password: "", username: "" });
     const [errors, setErrors] = useState<RegisterFormErrors>({ email: "", password: "", username: "", server: "" });
 
     const submitRegisterForm = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
+        setLoading(true);
         setErrors({ email: "", password: "", username:"", server: "" });
 
         const formErrors = { email: "", password: "", username:"", server: "" };
@@ -30,6 +32,7 @@ export default function RegisterModal({ isRegisterModalVisible, setUser, setIsRe
 
         if (Object.values(formErrors).some(error => error != "")) {
             setErrors(prevErrors => ({ ...prevErrors, ...formErrors }));
+            setLoading(false);
             return;
         }
         
@@ -44,6 +47,10 @@ export default function RegisterModal({ isRegisterModalVisible, setUser, setIsRe
             const message = axiosError.response?.data as string;
             setErrors(prevErrors => ({ ...prevErrors, server:message }));
         }
+        finally{
+            setLoading(false);
+        }
+
     }
 
     return (

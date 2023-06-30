@@ -10,15 +10,17 @@ import { AxiosError } from 'axios';
 
 type Props = {
     isLoginModalVisible: boolean,
+    setLoading:React.Dispatch<React.SetStateAction<boolean>>,
     setUser: React.Dispatch<React.SetStateAction<User | null>>,
     setIsLoginModalVisible: React.Dispatch<React.SetStateAction<boolean>>
 }
-export default function LoginModal({ isLoginModalVisible, setUser, setIsLoginModalVisible }: Props) {
+export default function LoginModal({ isLoginModalVisible, setUser, setLoading, setIsLoginModalVisible }: Props) {
     const [loginData, setLoginData] = useState<LoginData>({ email: "", password: "" })
     const [errors, setErrors] = useState<LoginFormErrors>({ email: "", password: "", server: "" })
 
     const submitLoginForm = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
+        setLoading(true);
         setErrors({ email: "", password: "", server: "" });
 
         const formErrors = { email: "", password: "", server: "" };
@@ -28,6 +30,7 @@ export default function LoginModal({ isLoginModalVisible, setUser, setIsLoginMod
 
         if (Object.values(formErrors).some(error => error != "")) {
             setErrors(prevErrors => ({ ...prevErrors, ...formErrors }));
+            setLoading(false);
             return;
         }
         try {
@@ -40,6 +43,9 @@ export default function LoginModal({ isLoginModalVisible, setUser, setIsLoginMod
             const axiosError = error as AxiosError;
             const message = axiosError.response?.data as string;
             setErrors(prevErrors => ({ ...prevErrors, server:message }));
+        }
+        finally{
+            setLoading(false);
         }
     }
     return (

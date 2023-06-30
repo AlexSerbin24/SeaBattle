@@ -16,7 +16,7 @@ export default class UserService {
             }
         });
         if (user) {
-            throw new Error("User is already existed");
+            throw new Error("User is already existed. Change email or user name");
         }
 
 

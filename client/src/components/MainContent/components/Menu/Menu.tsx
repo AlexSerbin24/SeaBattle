@@ -1,32 +1,57 @@
-import React, { Children } from 'react'
+import React, { useState, useEffect } from 'react'
 import Button from '../../../UI/Button/Button'
 import User from '../../../../types/User'
 import UserService from '../../../../services/UserService';
+import useSocket from '../../../../hooks/useSocket';
+import GameOptions from '../../../../types/GameOptions';
+import Game from '../../../../types/Game';
 
 type Props = {
     user: User | null,
-    setUser:React.Dispatch<React.SetStateAction<User | null>>,
-    setIsLoginModalVisible:React.Dispatch<React.SetStateAction<boolean>>,
-    setIsRegisterModalVisible:React.Dispatch<React.SetStateAction<boolean>>
+    setLoading:React.Dispatch<React.SetStateAction<boolean>>,
+    setUser: React.Dispatch<React.SetStateAction<User | null>>,
+    setGame:React.Dispatch<React.SetStateAction<Game>>,
+    setIsLoginModalVisible: React.Dispatch<React.SetStateAction<boolean>>,
+    setIsRegisterModalVisible: React.Dispatch<React.SetStateAction<boolean>>
 };
 
-export default function Menu({ user, setUser, setIsLoginModalVisible,setIsRegisterModalVisible }: Props) {
+export default function Menu({ user, setUser, setLoading, setGame, setIsLoginModalVisible, setIsRegisterModalVisible }: Props) {
+    const webSocket = useSocket();
+    const [currentUserOnlineCount, setCurrentUserOnlineCount] = useState(0);
 
-    const loginButtonClickHandler = (event:React.MouseEvent)=>{
+    const loginButtonClickHandler = (event: React.MouseEvent) => {
         setIsLoginModalVisible(true)
     }
 
-    const registerButtonClickHandler = (event:React.MouseEvent)=>{
+    const registerButtonClickHandler = (event: React.MouseEvent) => {
         setIsRegisterModalVisible(true)
     }
 
-    const logoutButtonClickHandler = async (event:React.MouseEvent)=>{
+    useEffect(() => {
+        webSocket.onMessage("user online:give user online count",(userOnlineCount:number)=>{setCurrentUserOnlineCount(userOnlineCount)})
+        webSocket.onMessage("search opponent:opponent found", (gameOptions:GameOptions) => {
+            setGame({gameOptions,isGameStated:true});
+            setLoading(false);
+        });
+    }, [])
+
+
+    const toBattleButtonClickHandler = (event: React.MouseEvent) => {
+        setLoading(true);
+        webSocket.sendMessage("search opponent:searching", { username: user?.username, trophies: user?.trophies });
+    }
+
+    const logoutButtonClickHandler = async (event: React.MouseEvent) => {
+        setLoading(true);
         try {
             await UserService.logout();
             localStorage.removeItem("token");
             setUser(null);
         } catch (error) {
             console.log(error) //TODO: handle exception in logout
+        }
+        finally{
+            setLoading(false);
         }
     }
 
@@ -37,7 +62,7 @@ export default function Menu({ user, setUser, setIsLoginModalVisible,setIsRegist
                 user
                     ?
                     <>
-                        <Button className='multiplayer-btn'>To battle</Button>
+                        <Button onClick={toBattleButtonClickHandler} className='multiplayer-btn'>To battle</Button>
                         <Button onClick={logoutButtonClickHandler} className='logout-btn'>Logout</Button>
                     </>
                     :
@@ -48,7 +73,7 @@ export default function Menu({ user, setUser, setIsLoginModalVisible,setIsRegist
 
             }
 
-            <h3>Players online: 1488</h3>
+            <h3>Players online: {currentUserOnlineCount}</h3>
         </div>
     )
 }
