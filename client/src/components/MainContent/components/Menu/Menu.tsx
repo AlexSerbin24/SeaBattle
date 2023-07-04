@@ -7,6 +7,7 @@ import GameOptions from '../../../../types/GameOptions';
 import Game from '../../../../types/Game';
 
 type Props = {
+    isEditMode:boolean,
     user: User | null,
     setLoading:React.Dispatch<React.SetStateAction<boolean>>,
     setUser: React.Dispatch<React.SetStateAction<User | null>>,
@@ -15,7 +16,7 @@ type Props = {
     setIsRegisterModalVisible: React.Dispatch<React.SetStateAction<boolean>>
 };
 
-export default function Menu({ user, setUser, setLoading, setGame, setIsLoginModalVisible, setIsRegisterModalVisible }: Props) {
+export default function Menu({ user, isEditMode, setUser, setLoading, setGame, setIsLoginModalVisible, setIsRegisterModalVisible }: Props) {
     const webSocket = useSocket();
     const [currentUserOnlineCount, setCurrentUserOnlineCount] = useState(0);
 
@@ -69,12 +70,12 @@ export default function Menu({ user, setUser, setLoading, setGame, setIsLoginMod
 
     return (
         <div className='menu'>
-            <Button className='singleplayer-btn'>Play with bot</Button>
+            <Button disabled={isEditMode} className='singleplayer-btn'>Play with bot</Button>
             {
                 user
                     ?
                     <>
-                        <Button onClick={toBattleButtonClickHandler} className='multiplayer-btn'>To battle</Button>
+                        <Button disabled={isEditMode} onClick={toBattleButtonClickHandler} className='multiplayer-btn'>To battle</Button>
                         <Button onClick={logoutButtonClickHandler} className='logout-btn'>Logout</Button>
                     </>
                     :

@@ -12,6 +12,7 @@ import Loader from '../UI/Loader/Loader';
 import OpponentBoard from './components/GameBoard/components/OpponentBoard';
 import PlayerBoard from './components/GameBoard/components/PlayerBoard';
 import GameOptions from '../../types/GameOptions';
+import PlayerStatus from './components/PlayerStatus/PlayerStatus';
 import WaitingOpponentMove from './components/WaitingOpponentMove/WaitingOpponentMove';
 
 export default function MainContent() {
@@ -129,8 +130,8 @@ export default function MainContent() {
           {/* Player's game board */}
           <PlayerBoard
             game={game}
-            username={user?.username}
-            trophies={user?.trophies}
+            username={user?.username ?? "Player"}
+            trophies={user?.trophies ?? 0}
             isEditMode={isEditMode}
             setIsEditMode={setIsEditMode}
             editShipsButtonClickHandler={editShipsButtonClickHandler}
@@ -139,11 +140,7 @@ export default function MainContent() {
 
         {/* Show current player or winner */}
         {game.isGameStarted && (
-          <h3 style={{ textAlign: "center" }}>
-            {!game.isGameFinished
-              ? `Now it's player turn: ${game.gameOptions?.currentPlayer}`
-              : `Winner is ${game.gameOptions?.currentPlayer}`}
-          </h3>
+          <PlayerStatus isGameFinished={game.isGameFinished} currentPlayer={game.gameOptions?.currentPlayer as string} />
         )}
 
         {/* Show opponent's game board or menu */}
@@ -151,6 +148,7 @@ export default function MainContent() {
           <OpponentBoard game={game} />
         ) : (
           <Menu
+            isEditMode={isEditMode}
             setLoading={setLoading}
             user={user}
             setUser={setUser}

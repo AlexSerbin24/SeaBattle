@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import useSocket from '../../../../../hooks/useSocket';
 import GameBoard from '../GameBoard';
+import PlayerInfo from './PlayerInfo';
 import ShipPlacements from '../../ShipPlacement/ShipPlacements';
 import Button from '../../../../UI/Button/Button';
 import ShipsState from '../../../../../types/ShipsState';
@@ -17,12 +18,13 @@ import Game from '../../../../../types/Game';
 import BoardSquareState from '../../../../../types/BoardSquareState';
 import BoardSquareStatus from '../../../../../types/BoardSquareStatus';
 import GameOptions from '../../../../../types/GameOptions';
+import EditShipsPanel from './EditShipsPanel';
 
 type Props = {
     game: Game;
     isEditMode: boolean;
-    username: string | undefined;
-    trophies: number | undefined;
+    username: string,
+    trophies: number,
     setIsEditMode: React.Dispatch<React.SetStateAction<boolean>>;
     editShipsButtonClickHandler: ((event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void);
 };
@@ -159,20 +161,16 @@ export default function PlayerBoard({ game, isEditMode, username, trophies, setI
                 boardSquares={boardSquares}
             />
 
-            {!game.isGameStarted ? (
-                isEditMode ? (
-                    <ShipPlacements allowedShips={ships} updateShip={updateShipById} setEditMode={setIsEditMode} />
-                ) : (
-                    <Button onClick={editShipsButtonClickHandler} className='edit-ships-btn'>
-                        Edit ships placements
-                    </Button>
-                )
-            ) : (
-                <>
-                    <h3 style={{ textAlign: "center" }}>{username ? username : "unknown"}</h3>
-                    <h3 style={{ textAlign: "center" }}>Trophies: {trophies ? trophies : 0}</h3>
-                </>
-            )}
+            {!game.isGameStarted ?
+                <EditShipsPanel
+                    isEditMode={isEditMode}
+                    ships={ships}
+                    updateShipById={updateShipById}
+                    editShipsButtonClickHandler={editShipsButtonClickHandler}
+                    setIsEditMode={setIsEditMode} />
+                :
+                <PlayerInfo playername={username} trophies={trophies} />
+            }
         </>
     );
 }

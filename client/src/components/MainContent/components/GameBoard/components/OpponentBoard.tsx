@@ -4,6 +4,7 @@ import Game from '../../../../../types/Game';
 import BoardSquareState from '../../../../../types/BoardSquareState';
 import useSocket from '../../../../../hooks/useSocket';
 import BoardSquareStatus from '../../../../../types/BoardSquareStatus';
+import PlayerInfo from './PlayerInfo';
 
 type Props = {
     game: Game
@@ -36,8 +37,7 @@ export default function OpponentBoard({ game }: Props) {
     return (
         <div>
             <GameBoard isEnemyField={true} isGameStarted={true} boardSquares={boardSquares} room={game.gameOptions?.room as string} />
-            <h3 style={{ textAlign: "center" }}>{game.gameOptions?.opponent}</h3>
-            <h3 style={{ textAlign: "center" }}>Trophies: {game.gameOptions?.opponentTrophies}</h3>
+            <PlayerInfo playername={game.gameOptions?.opponent as string} trophies={game.gameOptions?.opponentTrophies as number}/>
         </div>
     );
 }
