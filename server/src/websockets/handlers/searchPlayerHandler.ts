@@ -8,13 +8,14 @@ export default function registerSearchPlayerHandlers(io: Server, socket: Socket)
         if (opponent) {
             await SearchUserService.removeSearchUser(opponent.socketId);//нужно еще будет учитывать, что пользователь мог ливнуть, когда искал оппонента
             const room = `${socket.id}-${opponent.socketId}`;
-            
+            const currentPlayer = [username, opponent.username][Math.floor(Math.random() * 2)];
+
             const opponentSocket = io.sockets.sockets.get(opponent.socketId);
             opponentSocket?.join(room);
             socket.join(room);
             
-            io.to(opponent.socketId).emit("search opponent:opponent found",{room, opponent: username});
-            io.to(socket.id).emit("search opponent:opponent found", {room, opponent: opponent.username});
+            io.to(opponent.socketId).emit("search opponent:opponent found",{room, opponent: username, currentPlayer, opponentTrophies:trophies});
+            io.to(socket.id).emit("search opponent:opponent found", {room, opponent: opponent.username, currentPlayer, opponentTrophies:opponent.trophies});
             return;
         }
 

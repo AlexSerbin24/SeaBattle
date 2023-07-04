@@ -1,11 +1,15 @@
-import React, { forwardRef, ForwardedRef } from 'react'
+import React, { forwardRef, ForwardedRef, useState, useEffect } from 'react'
+import BoardSquare from './components/BoardSquare';
+import BoardSquareState from '../../../../types/BoardSquareState';
 
 
 type Props = {
     isEnemyField: boolean,
-
+    isGameStarted: boolean,
+    room:string
+    boardSquares:BoardSquareState[],
 }
-const  GameBoard = forwardRef(({isEnemyField}:Props, ref:ForwardedRef<HTMLTableElement> )=> {
+const GameBoard = forwardRef(({ isEnemyField, isGameStarted, room, boardSquares }: Props, ref: ForwardedRef<HTMLTableElement> | undefined) => {
     const boardLines = Array.from({ length: 10 }, (r, rowIndex) =>
         <tr key={`row${rowIndex}`} className='board-row'>
             {
@@ -13,7 +17,12 @@ const  GameBoard = forwardRef(({isEnemyField}:Props, ref:ForwardedRef<HTMLTableE
                     <th>{rowIndex + 1}</th>
                     {
                         Array.from({ length: 10 }, (c, columnIndex) =>
-                            <td  className='board-square' key={`${rowIndex};${columnIndex}`}></td>
+                            <BoardSquare key={`${rowIndex};${columnIndex}`}
+                                id={(10 * rowIndex) + columnIndex}
+                                isGameStarted={isGameStarted}
+                                isEnemyField={isEnemyField}
+                                room={room}
+                                status={boardSquares[(10*rowIndex) + columnIndex].status}/>
                         )
                     }
                 </>

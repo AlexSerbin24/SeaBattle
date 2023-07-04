@@ -38,7 +38,7 @@ export default function Ships({ isEditMode, isGameStarted, allowedShips, updateS
     });
 
     return result;
-  }, [allowedShips, isGameStarted]);
+  }, [allowedShips, isEditMode, isGameStarted]);
 
   return <>{ships}</>;
 }

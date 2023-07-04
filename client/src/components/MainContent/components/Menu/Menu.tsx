@@ -28,11 +28,23 @@ export default function Menu({ user, setUser, setLoading, setGame, setIsLoginMod
     }
 
     useEffect(() => {
-        webSocket.onMessage("user online:give user online count",(userOnlineCount:number)=>{setCurrentUserOnlineCount(userOnlineCount)})
-        webSocket.onMessage("search opponent:opponent found", (gameOptions:GameOptions) => {
-            setGame({gameOptions,isGameStated:true});
+        function giveUserOnlineCount(userOnlineCount:number){
+            setCurrentUserOnlineCount(userOnlineCount);
+        }
+        function opponentFound(gameOptions:GameOptions){
+            console.log(gameOptions)
+            setGame({gameOptions,isGameStarted:true, isGameFinished:false});
             setLoading(false);
-        });
+        }
+        webSocket.onMessage("user online:give user online count", giveUserOnlineCount);
+        webSocket.onMessage("search opponent:opponent found", opponentFound);
+
+        webSocket.sendMessage("user online:give user online count");
+
+        return ()=>{
+            webSocket.offMessage("user online:give user online count", giveUserOnlineCount);
+            webSocket.offMessage("search opponent:opponent found", opponentFound);
+        }
     }, [])
 
 

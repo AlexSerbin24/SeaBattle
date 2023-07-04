@@ -11,7 +11,7 @@ type Props = {
 export default function ShipPlacement({ shipId, shipSize, updateShip }: Props) {
     const placementRef = useRef<HTMLDivElement>(null);
 
-    //set to each ship its placement in edit mode
+    //Set to each ship it`s placement in edit mode
     useEffect(() => {
         const { left, top } = (placementRef.current as HTMLDivElement).getBoundingClientRect();
         updateShip(shipId,{placement:{x:left, y:top+window.scrollY}})

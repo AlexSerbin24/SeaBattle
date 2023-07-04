@@ -1,147 +1,165 @@
-import React, { useRef, useState, useEffect } from 'react'
-import Container from '../UI/Container/Container'
-import GameBoard from './components/GameBoard/GameBoard'
-import Menu from './components/Menu/Menu'
-import ShipPlacements from './components/ShipPlacement/ShipPlacements'
-import Ships from './components/Ships/Ships'
-import ShipsState from '../../types/ShipsState'
-import Ship from '../../types/Ship'
-import Button from '../UI/Button/Button'
-import {
-  getLargeShipsDefaultCoordinates,
-  getMediumShipsDefaultCoordinates,
-  getSmallShipsDefaultCoordinates,
-  getTinyShipsDefaultCoordinates
-} from '../../utils/shipsDefaultProperties'
-
-import UpdatedShip from '../../types/UpdatedShip'
-import LoginModal from './components/Modals/LoginModal'
-import RegisterModal from './components/Modals/RegisterModal'
-import User from '../../types/User'
-import UserService from '../../services/UserService'
-import { AxiosError } from 'axios'
-import Game from '../../types/Game'
-import useSocket from '../../hooks/useSocket'
-import Loader from '../UI/Loader/Loader'
-
+import React, { useState, useEffect } from 'react';
+import Container from '../UI/Container/Container';
+import Menu from './components/Menu/Menu';
+import LoginModal from './components/Modals/LoginModal';
+import RegisterModal from './components/Modals/RegisterModal';
+import User from '../../types/User';
+import UserService from '../../services/UserService';
+import { AxiosError } from 'axios';
+import Game from '../../types/Game';
+import useSocket from '../../hooks/useSocket';
+import Loader from '../UI/Loader/Loader';
+import OpponentBoard from './components/GameBoard/components/OpponentBoard';
+import PlayerBoard from './components/GameBoard/components/PlayerBoard';
+import GameOptions from '../../types/GameOptions';
+import WaitingOpponentMove from './components/WaitingOpponentMove/WaitingOpponentMove';
 
 export default function MainContent() {
-  const webSocket = useSocket();
-  const gameBoardRef = useRef<HTMLTableElement>(null);
-  const enemyGameBoardRef = useRef<HTMLTableElement>(null);
+  const socket = useSocket();
   const [loading, setLoading] = useState(false);
   const [isRegisterModalVisible, setIsRegisterModalVisible] = useState(false);
-  const [isLoginModalVisible, setIsLoginModalVisible] = useState(false)
+  const [isLoginModalVisible, setIsLoginModalVisible] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
-  const [user, setUser] = useState<User | null>(null)
-  const [game, setGame] = useState<Game>({ isGameStated: false, gameOptions: null });
-  const [ships, setShips] = useState<ShipsState>({
-    largeShips: [
-      { id: 1, coordinates: { x: 0, y: 0 }, placement: { x: 0, y: 0 }, isRotated: false }
-    ],
-    mediumShips: [
-      { id: 2, coordinates: { x: 0, y: 0 }, placement: { x: 0, y: 0 }, isRotated: false },
-      { id: 3, coordinates: { x: 0, y: 0 }, placement: { x: 0, y: 0 }, isRotated: false }
-    ],
-    smallShips: [
-      { id: 4, coordinates: { x: 0, y: 0 }, placement: { x: 0, y: 0 }, isRotated: false },
-      { id: 5, coordinates: { x: 0, y: 0 }, placement: { x: 0, y: 0 }, isRotated: false },
-      { id: 6, coordinates: { x: 0, y: 0 }, placement: { x: 0, y: 0 }, isRotated: false }
-    ],
-    tinyShips: [
-      { id: 7, coordinates: { x: 0, y: 0 }, placement: { x: 0, y: 0 }, isRotated: false },
-      { id: 8, coordinates: { x: 0, y: 0 }, placement: { x: 0, y: 0 }, isRotated: false },
-      { id: 9, coordinates: { x: 0, y: 0 }, placement: { x: 0, y: 0 }, isRotated: false },
-      { id: 10, coordinates: { x: 0, y: 0 }, placement: { x: 0, y: 0 }, isRotated: false }
-    ]
+  const [user, setUser] = useState<User | null>(null);
+  const [game, setGame] = useState<Game>({
+    isGameStarted: false,
+    isGameFinished: false,
+    gameOptions: null
   });
 
   useEffect(() => {
-    const gameBoard = gameBoardRef.current;
-    if (gameBoard) {
-      const shipBlocks = gameBoard.querySelectorAll("td");
-      setShips((prevState) => {
-        const updatedShips = { ...prevState };
-        for (const key in updatedShips) {
-          const shipType = key as keyof ShipsState;
-
-          let resultArr: Omit<Ship, "id">[] = [];
-          switch (shipType) {
-            case "largeShips":
-              resultArr = getLargeShipsDefaultCoordinates(shipBlocks);
-              break;
-            case "mediumShips":
-              resultArr = getMediumShipsDefaultCoordinates(shipBlocks);
-              break;
-            case 'smallShips':
-              resultArr = getSmallShipsDefaultCoordinates(shipBlocks);
-              break;
-            case 'tinyShips':
-              resultArr = getTinyShipsDefaultCoordinates(shipBlocks);
-              break;
-          }
-
-          updatedShips[shipType] = updatedShips[shipType].map((ship, index) => {
-            const defaultProps = resultArr[index]
-            return { ...ship, ...defaultProps }
-          });
-        };
-        return updatedShips;
+    // Refresh user token and store access token in local storage
+    UserService.refresh()
+      .then((data) => {
+        const { accessToken, ...user } = data;
+        localStorage.setItem("token", accessToken);
+        setUser(user);
       })
-    }
-    UserService.refresh().then((data) => {
-      const { accessToken, ...user } = data;
-      localStorage.setItem("token", accessToken);
-      setUser(user);
-    }).catch((error: AxiosError) => console.log(error) /*TODO: handle expception*/);
+      .catch((error: AxiosError) =>
+        console.log(error) /*TODO: handle exception*/
+      );
   }, []);
+
+  useEffect(() => {
+    if (game.isGameStarted) {
+      // Update current player when receiving a message
+      const changeCurrentPlayer = (nextMovePlayer: string) => {
+        const gameOptions = { ...game.gameOptions, currentPlayer: nextMovePlayer } as GameOptions;
+        setGame(prevState => ({ ...prevState, gameOptions }));
+      };
+
+      // Handle game over event
+      const gameOver = (winnerTrophies: number, loserTrophies: number) => {
+        // Update user trophies based on the game result
+        const [userTrophies, opponentTrophies] =
+          user?.username === game.gameOptions?.currentPlayer
+            ? [winnerTrophies, loserTrophies]
+            : [loserTrophies, winnerTrophies];
+
+        setUser(prevState => {
+          const userState = { ...prevState as User };
+          return { ...userState, trophies: userTrophies };
+        });
+
+        // Update game state to mark it as finished and update opponent trophies
+        setGame(prevState => {
+          const gameOptions = { ...prevState.gameOptions } as GameOptions;
+          gameOptions.opponentTrophies = opponentTrophies;
+          return { ...prevState, isGameFinished: true, gameOptions };
+        });
+      };
+
+      // Subscribe to socket messages for game events
+      socket.onMessage("game:change current player", changeCurrentPlayer);
+      socket.onMessage("game:game over", gameOver);
+
+      // Clean up subscriptions on component unmount
+      return () => {
+        socket.offMessage("game:change current player", changeCurrentPlayer);
+        socket.offMessage("game:game over", gameOver);
+      };
+    }
+  }, [game.isGameStarted]);
+
+  useEffect(() => {
+    if (game.isGameFinished) {
+      // Return to menu after 10 seconds when the game is finished
+      const timeoutId = setTimeout(() => {
+        setGame({ isGameStarted: false, gameOptions: null, isGameFinished: false });
+      }, 10000);
+
+      // Clean up timeout on component unmount or when the game is reset
+      return () => {
+        clearTimeout(timeoutId);
+      };
+    }
+  }, [game.isGameFinished]);
 
   const editShipsButtonClickHandler = (event: React.MouseEvent<HTMLButtonElement>) => {
     setIsEditMode(true);
-  }
-
-  function updateShipById(id: number, data: UpdatedShip) {
-    setShips((prevState) => {
-      const updatedShips = { ...prevState };
-      for (const key in updatedShips) {
-        const shipType = key as keyof ShipsState;
-        updatedShips[shipType] = updatedShips[shipType].map(ship =>
-          ship.id == id ? { ...ship, ...data } : ship
-        );
-      }
-      return updatedShips;
-    });
-  }
+  };
 
   return (
     <Container className='main-container'>
-      <Loader loading={loading}/>
+      <Loader loading={loading} />
+
+      {/* Show WaitingOpponentMove component if the game is in progress and opponent is making his move */}
+      {user && game.gameOptions && (
+        <WaitingOpponentMove
+          isWaiting={user.username !== game.gameOptions.currentPlayer && !game.isGameFinished}
+        />
+      )}
+
       <main>
-        <RegisterModal setLoading={setLoading} isRegisterModalVisible={isRegisterModalVisible} setUser={setUser} setIsRegisterModalVisible={setIsRegisterModalVisible} />
-        <LoginModal setLoading={setLoading}  isLoginModalVisible={isLoginModalVisible} setUser={setUser} setIsLoginModalVisible={setIsLoginModalVisible} />
+        {/* Modals for login and registration */}
+        <RegisterModal
+          setLoading={setLoading}
+          isRegisterModalVisible={isRegisterModalVisible}
+          setUser={setUser}
+          setIsRegisterModalVisible={setIsRegisterModalVisible}
+        />
+        <LoginModal
+          setLoading={setLoading}
+          isLoginModalVisible={isLoginModalVisible}
+          setUser={setUser}
+          setIsLoginModalVisible={setIsLoginModalVisible}
+        />
+
         <div>
-          <Ships isEditMode={isEditMode} allowedShips={ships} isGameStarted={game.isGameStated} updateShip={updateShipById} />
-          <GameBoard ref={gameBoardRef} isEnemyField={false} />
-          {!game.isGameStated ? (
-            isEditMode ?
-              <ShipPlacements allowedShips={ships} updateShip={updateShipById} setEditMode={setIsEditMode} />
-              :
-              <Button onClick={editShipsButtonClickHandler} className='edit-ships-btn'>Edit ships placements</Button>
-          )
-            :
-            <h3 style={{textAlign:"center"}}>{user?.username}</h3>
-          }
+          {/* Player's game board */}
+          <PlayerBoard
+            game={game}
+            username={user?.username}
+            trophies={user?.trophies}
+            isEditMode={isEditMode}
+            setIsEditMode={setIsEditMode}
+            editShipsButtonClickHandler={editShipsButtonClickHandler}
+          />
         </div>
 
-        {game.isGameStated ?
-          <div>
-            <GameBoard ref={enemyGameBoardRef} isEnemyField={true} />
-            <h3 style={{textAlign:"center"}}>{game.gameOptions?.opponent}</h3>
-          </div>
-          :
-          <Menu setLoading={setLoading}  user={user} setUser={setUser} setGame={setGame} setIsRegisterModalVisible={setIsRegisterModalVisible} setIsLoginModalVisible={setIsLoginModalVisible} />
-        }
+        {/* Show current player or winner */}
+        {game.isGameStarted && (
+          <h3 style={{ textAlign: "center" }}>
+            {!game.isGameFinished
+              ? `Now it's player turn: ${game.gameOptions?.currentPlayer}`
+              : `Winner is ${game.gameOptions?.currentPlayer}`}
+          </h3>
+        )}
+
+        {/* Show opponent's game board or menu */}
+        {game.isGameStarted ? (
+          <OpponentBoard game={game} />
+        ) : (
+          <Menu
+            setLoading={setLoading}
+            user={user}
+            setUser={setUser}
+            setGame={setGame}
+            setIsRegisterModalVisible={setIsRegisterModalVisible}
+            setIsLoginModalVisible={setIsLoginModalVisible}
+          />
+        )}
       </main>
     </Container>
-  )
+  );
 }

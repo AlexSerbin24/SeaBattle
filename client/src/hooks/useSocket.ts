@@ -12,7 +12,11 @@ const useSocket = () => {
         webSocket.on(event, callback);
     };
 
-    return { sendMessage, onMessage };
+    const offMessage = (event:string, callback: (...data:any[]) => void) =>{
+        webSocket.off(event,callback)
+    }
+
+    return { sendMessage, onMessage, offMessage };
 
 }
 

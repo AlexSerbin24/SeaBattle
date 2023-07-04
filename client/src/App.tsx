@@ -3,7 +3,6 @@ import "./style.css"
 import Header from './components/Header/Header';
 import MainContent from './components/MainContent/MainContent';
 import Footer from './components/Footer/Footer';
-import socket from './sockets/socket';
 
 export default function App() {
   useEffect(() => {
