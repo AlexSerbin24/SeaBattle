@@ -1,34 +1,15 @@
-import React, { forwardRef, ForwardedRef, useState, useEffect } from 'react'
-import BoardSquare from './components/BoardSquare';
+import React, { forwardRef, ForwardedRef } from 'react'
+import GameBoardRows from './GameBoardRows';
 import BoardSquareState from '../../../../types/BoardSquareState';
 
 
 type Props = {
-    isEnemyField: boolean,
-    isGameStarted: boolean,
-    room:string
+    isGameStarted:boolean,
     boardSquares:BoardSquareState[],
+    boardSquareClickHandler?:((id: number) => (event: React.MouseEvent<Element, MouseEvent>) => void)
+
 }
-const GameBoard = forwardRef(({ isEnemyField, isGameStarted, room, boardSquares }: Props, ref: ForwardedRef<HTMLTableElement> | undefined) => {
-    const boardLines = Array.from({ length: 10 }, (r, rowIndex) =>
-        <tr key={`row${rowIndex}`} className='board-row'>
-            {
-                <>
-                    <th>{rowIndex + 1}</th>
-                    {
-                        Array.from({ length: 10 }, (c, columnIndex) =>
-                            <BoardSquare key={`${rowIndex};${columnIndex}`}
-                                id={(10 * rowIndex) + columnIndex}
-                                isGameStarted={isGameStarted}
-                                isEnemyField={isEnemyField}
-                                room={room}
-                                status={boardSquares[(10*rowIndex) + columnIndex].status}/>
-                        )
-                    }
-                </>
-            }
-        </tr>
-    );
+export default  forwardRef(function GameBoard({  isGameStarted, boardSquares, boardSquareClickHandler }: Props, ref: ForwardedRef<HTMLTableElement> | undefined)  {
 
     return (
         <div>
@@ -46,10 +27,9 @@ const GameBoard = forwardRef(({ isEnemyField, isGameStarted, room, boardSquares 
                     <th>I</th>
                     <th>J</th>
                 </tr>
-                {boardLines}
+                <GameBoardRows isGameStarted={isGameStarted} boardSquares={boardSquares} boardSquareClickHandler={boardSquareClickHandler}/>
             </table>
         </div>
     )
 });
 
-export default GameBoard;

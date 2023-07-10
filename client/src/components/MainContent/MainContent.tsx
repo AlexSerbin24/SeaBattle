@@ -7,26 +7,72 @@ import User from '../../types/User';
 import UserService from '../../services/UserService';
 import { AxiosError } from 'axios';
 import Game from '../../types/Game';
-import useSocket from '../../hooks/useSocket';
 import Loader from '../UI/Loader/Loader';
-import OpponentBoard from './components/GameBoard/components/OpponentBoard';
-import PlayerBoard from './components/GameBoard/components/PlayerBoard';
+import OpponentBoard from './components/GameBoard/components/OpponentBoard/OpponentBoard';
+import PlayerBoard from './components/GameBoard/components/PlayerBoard/PlayerBoard';
 import GameOptions from '../../types/GameOptions';
 import PlayerStatus from './components/PlayerStatus/PlayerStatus';
 import WaitingOpponentMove from './components/WaitingOpponentMove/WaitingOpponentMove';
 
 export default function MainContent() {
-  const socket = useSocket();
   const [loading, setLoading] = useState(false);
   const [isRegisterModalVisible, setIsRegisterModalVisible] = useState(false);
   const [isLoginModalVisible, setIsLoginModalVisible] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [user, setUser] = useState<User | null>(null);
-  const [game, setGame] = useState<Game>({
-    isGameStarted: false,
-    isGameFinished: false,
-    gameOptions: null
-  });
+
+  const defaultGameOptions: GameOptions = {
+    room: "",
+    currentPlayer: user?.username ?? "Player",
+    opponent: "Bot",
+    opponentTrophies: 0,
+    type: "singleplayer"
+  }
+  
+  const [game, setGame] = useState<Game>({ isGameStarted: false, isGameFinished: false, gameOptions: defaultGameOptions });
+
+  /**
+   * Start game. According to game type change game options.
+   * @param gameOptions Game options. By default it is for singleplayer
+   */
+  const startGame = (gameOptions:GameOptions = defaultGameOptions)=>{
+    setGame({gameOptions, isGameStarted:true, isGameFinished:false})
+  }
+
+  /**
+   * Change current player
+   * @param nextMovePlayer Player that will make move
+   */
+  const changeCurrentPlayer = (nextMovePlayer: string)=>{
+    const gameOptions = { ...game.gameOptions, currentPlayer: nextMovePlayer } as GameOptions;
+    setGame(prevState => ({ ...prevState, gameOptions })); //change currentPlayer
+  }
+
+  /**
+   * Finish game. Shows the winner and changes trophies
+   * @param userTrophies New user trophies value. For unauthorized user is 0
+   * @param opponentTrophies New opponent trophies value. Default opponent is bot so default trophies value is 0
+   */
+  const finishGame = (userTrophies: number = user?.trophies ?? 0, opponentTrophies: number = 0) => {
+    setUser(prevState => {
+      const userState = { ...prevState as User };
+      return { ...userState, trophies: userTrophies };
+    });
+
+    // Update game state to mark it as finished and update opponent trophies
+    setGame(prevState => {
+      const gameOptions = { ...prevState.gameOptions } as GameOptions;
+      gameOptions.opponentTrophies = opponentTrophies;
+      return { ...prevState, isGameFinished: true, gameOptions };
+    }); //finish game
+  }
+
+  /**
+   * Close game function. It returns player to main menu
+   */
+  const closeGame = ()=>{
+    setGame({ isGameStarted: false, gameOptions: defaultGameOptions, isGameFinished: false }); 
+  }
 
   useEffect(() => {
     // Refresh user token and store access token in local storage
@@ -41,52 +87,12 @@ export default function MainContent() {
       );
   }, []);
 
-  useEffect(() => {
-    if (game.isGameStarted) {
-      // Update current player when receiving a message
-      const changeCurrentPlayer = (nextMovePlayer: string) => {
-        const gameOptions = { ...game.gameOptions, currentPlayer: nextMovePlayer } as GameOptions;
-        setGame(prevState => ({ ...prevState, gameOptions }));
-      };
-
-      // Handle game over event
-      const gameOver = (winnerTrophies: number, loserTrophies: number) => {
-        // Update user trophies based on the game result
-        const [userTrophies, opponentTrophies] =
-          user?.username === game.gameOptions?.currentPlayer
-            ? [winnerTrophies, loserTrophies]
-            : [loserTrophies, winnerTrophies];
-
-        setUser(prevState => {
-          const userState = { ...prevState as User };
-          return { ...userState, trophies: userTrophies };
-        });
-
-        // Update game state to mark it as finished and update opponent trophies
-        setGame(prevState => {
-          const gameOptions = { ...prevState.gameOptions } as GameOptions;
-          gameOptions.opponentTrophies = opponentTrophies;
-          return { ...prevState, isGameFinished: true, gameOptions };
-        });
-      };
-
-      // Subscribe to socket messages for game events
-      socket.onMessage("game:change current player", changeCurrentPlayer);
-      socket.onMessage("game:game over", gameOver);
-
-      // Clean up subscriptions on component unmount
-      return () => {
-        socket.offMessage("game:change current player", changeCurrentPlayer);
-        socket.offMessage("game:game over", gameOver);
-      };
-    }
-  }, [game.isGameStarted]);
-
+  //Game finish useEffect
   useEffect(() => {
     if (game.isGameFinished) {
       // Return to menu after 10 seconds when the game is finished
       const timeoutId = setTimeout(() => {
-        setGame({ isGameStarted: false, gameOptions: null, isGameFinished: false });
+        closeGame();
       }, 10000);
 
       // Clean up timeout on component unmount or when the game is reset
@@ -104,10 +110,10 @@ export default function MainContent() {
     <Container className='main-container'>
       <Loader loading={loading} />
 
-      {/* Show WaitingOpponentMove component if the game is in progress and opponent is making his move */}
-      {user && game.gameOptions && (
+      {/* Show WaitingOpponentMove component if the game is in progress and opponent is making his move or game is finished */}
+      {game.isGameStarted && (
         <WaitingOpponentMove
-          isWaiting={user.username !== game.gameOptions.currentPlayer && !game.isGameFinished}
+          isWaiting={(user && user.username !== game.gameOptions.currentPlayer) || (game.gameOptions.currentPlayer == defaultGameOptions.opponent) || game.isGameFinished}
         />
       )}
 
@@ -130,6 +136,8 @@ export default function MainContent() {
           {/* Player's game board */}
           <PlayerBoard
             game={game}
+            changeCurrentPlayer={changeCurrentPlayer}
+            finishGame={finishGame}
             username={user?.username ?? "Player"}
             trophies={user?.trophies ?? 0}
             isEditMode={isEditMode}
@@ -144,19 +152,19 @@ export default function MainContent() {
         )}
 
         {/* Show opponent's game board or menu */}
-        {game.isGameStarted ? (
-          <OpponentBoard game={game} />
-        ) : (
+        {game.isGameStarted ?
+          <OpponentBoard game={game} changeCurrentPlayer={changeCurrentPlayer} finishGame={finishGame} />
+          :
           <Menu
             isEditMode={isEditMode}
             setLoading={setLoading}
             user={user}
             setUser={setUser}
-            setGame={setGame}
+            startGame={startGame}
             setIsRegisterModalVisible={setIsRegisterModalVisible}
             setIsLoginModalVisible={setIsLoginModalVisible}
           />
-        )}
+        }
       </main>
     </Container>
   );

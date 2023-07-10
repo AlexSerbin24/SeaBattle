@@ -7,18 +7,22 @@ import GameOptions from '../../../../types/GameOptions';
 import Game from '../../../../types/Game';
 
 type Props = {
-    isEditMode:boolean,
+    isEditMode: boolean,
     user: User | null,
-    setLoading:React.Dispatch<React.SetStateAction<boolean>>,
+    setLoading: React.Dispatch<React.SetStateAction<boolean>>,
     setUser: React.Dispatch<React.SetStateAction<User | null>>,
-    setGame:React.Dispatch<React.SetStateAction<Game>>,
+    startGame: (gameOptions?: GameOptions) => void
     setIsLoginModalVisible: React.Dispatch<React.SetStateAction<boolean>>,
     setIsRegisterModalVisible: React.Dispatch<React.SetStateAction<boolean>>
 };
 
-export default function Menu({ user, isEditMode, setUser, setLoading, setGame, setIsLoginModalVisible, setIsRegisterModalVisible }: Props) {
+export default function Menu({ user, isEditMode, setUser, setLoading, startGame, setIsLoginModalVisible, setIsRegisterModalVisible }: Props) {
     const webSocket = useSocket();
     const [currentUserOnlineCount, setCurrentUserOnlineCount] = useState(0);
+
+    const singleplayerButtonClickHandler = (event: React.MouseEvent) => {
+        startGame();
+    }
 
     const loginButtonClickHandler = (event: React.MouseEvent) => {
         setIsLoginModalVisible(true)
@@ -29,12 +33,11 @@ export default function Menu({ user, isEditMode, setUser, setLoading, setGame, s
     }
 
     useEffect(() => {
-        function giveUserOnlineCount(userOnlineCount:number){
+        function giveUserOnlineCount(userOnlineCount: number) {
             setCurrentUserOnlineCount(userOnlineCount);
         }
-        function opponentFound(gameOptions:GameOptions){
-            console.log(gameOptions)
-            setGame({gameOptions,isGameStarted:true, isGameFinished:false});
+        function opponentFound(gameOptions: GameOptions) {
+            startGame(gameOptions);
             setLoading(false);
         }
         webSocket.onMessage("user online:give user online count", giveUserOnlineCount);
@@ -42,7 +45,7 @@ export default function Menu({ user, isEditMode, setUser, setLoading, setGame, s
 
         webSocket.sendMessage("user online:give user online count");
 
-        return ()=>{
+        return () => {
             webSocket.offMessage("user online:give user online count", giveUserOnlineCount);
             webSocket.offMessage("search opponent:opponent found", opponentFound);
         }
@@ -63,14 +66,14 @@ export default function Menu({ user, isEditMode, setUser, setLoading, setGame, s
         } catch (error) {
             console.log(error) //TODO: handle exception in logout
         }
-        finally{
+        finally {
             setLoading(false);
         }
     }
 
     return (
         <div className='menu'>
-            <Button disabled={isEditMode} className='singleplayer-btn'>Play with bot</Button>
+            <Button onClick={singleplayerButtonClickHandler} disabled={isEditMode} className='singleplayer-btn'>Play with bot</Button>
             {
                 user
                     ?
