@@ -11,7 +11,7 @@ type Props = {
     boardSquares: BoardSquareState[],
     username: string,
     trophies: number,
-    handleOpponentMove:(boardSquareId: number)=> { isHit: boolean, hittedBoardSquares: number },
+    handleOpponentMove:(boardSquareId: number)=> { isHit: boolean, hittedBoardSquares: number, boardSquaresIdsAroundShip:number[] },
     checkGameStatus:(hittedBoardSquares: number, continueGame: () => void, finishGame: () => void)=>void,
     changeCurrentPlayer: (nextMovePlayer: string) => void,
     finishGame: (userTrophies?: number, opponentTrophies?: number) => void
@@ -38,11 +38,11 @@ export default forwardRef(function MultiplayerBoard({ gameOptions, boardSquares,
 
 
         const opponentMove = (borderSquareId: number) => {
-            const {isHit, hittedBoardSquares} = handleOpponentMove(borderSquareId);
+            const {isHit, hittedBoardSquares, boardSquaresIdsAroundShip} = handleOpponentMove(borderSquareId);
 
             const { room, currentPlayer, opponentTrophies } = gameOptions;
             // Notify the opponent that the move has finished
-            socket.sendMessage("game:player move finished", room, borderSquareId, isHit);
+            socket.sendMessage("game:player move finished", room, borderSquareId, isHit, boardSquaresIdsAroundShip);
             // Check if the game is over or change the current player
             checkGameStatus(hittedBoardSquares,
                 () => socket.sendMessage("game:change current player", room, isHit, currentPlayer, username),

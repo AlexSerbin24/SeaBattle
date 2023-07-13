@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { ShipSize } from '../../../../types/ShipSize';
-import ShipsState from '../../../../types/ShipsState';
 import UpdatedShip from '../../../../types/UpdatedShip';
 
 type Props = {
@@ -11,10 +10,11 @@ type Props = {
     shipSize: ShipSize,
     shipCoordinates: { x: number, y: number },
     shipPlacements: { x: number, y: number },
-    updateShip: (id: number, data: UpdatedShip)=>void;
+    boardSquaresIds: number[],
+    updateShip: (id: number, data: UpdatedShip) => void;
 }
 
-export default function Ship({ id, shipSize, isGameStarted, isEditMode, shipCoordinates, shipPlacements, isRotated, updateShip }: Props) {
+export default function Ship({ id, shipSize, isGameStarted, isEditMode, shipCoordinates, shipPlacements, isRotated, boardSquaresIds, updateShip }: Props) {
     const shipRef = useRef<HTMLDivElement>(null);
     const [isDraggable, setIsDraggable] = useState(false);
     const [isPositionOnBoardFound, setIsPositionOnBoardFound] = useState(false);
@@ -44,8 +44,10 @@ export default function Ship({ id, shipSize, isGameStarted, isEditMode, shipCoor
                 event.pageY - shiftY + blockHeight / 2 - window.scrollY
             );
 
+
             //check if availiable block on board is found
-            if (targetElement?.tagName === "TD") {
+            if (targetElement && targetElement?.tagName === "TD") {
+
                 const { top: tdTop, left: tdLeft } = targetElement.getBoundingClientRect();
 
                 //check if neighboring blocks are not occupied by other ships.
@@ -79,8 +81,8 @@ export default function Ship({ id, shipSize, isGameStarted, isEditMode, shipCoor
                 // if position is available we change state of isPositionOnBoardFound but dont confirm it
                 if (!isUnavailablePosition) {
                     setIsPositionOnBoardFound(true);
-                    updateShip(id,{coordinates:{ x: tdLeft, y: tdTop + window.scrollY }})
-        
+                    updateShip(id, { coordinates: { x: tdLeft, y: tdTop + window.scrollY } })
+
                     shipElement.hidden = false;
                     return;
                 }
@@ -93,7 +95,7 @@ export default function Ship({ id, shipSize, isGameStarted, isEditMode, shipCoor
             const x = event.pageX - shiftX;
             const y = event.pageY - shiftY;
             shipElement.hidden = false;
-            updateShip(id,{coordinates:{x,y}})
+            updateShip(id, { coordinates: { x, y } })
         };
 
         document.addEventListener("mousemove", onMouseMoveHandler);
@@ -151,19 +153,41 @@ export default function Ship({ id, shipSize, isGameStarted, isEditMode, shipCoor
                     }
 
                 }
-                updateShip(id,{isRotated:!isRotated})
+                const newBoardSquaresIds = [...boardSquaresIds];
+                for (let shipBlock = 1; shipBlock < shipSize; shipBlock++) {
+                    newBoardSquaresIds[shipBlock] = isRotated ? newBoardSquaresIds[0] + shipBlock : newBoardSquaresIds[0] + 10 * shipBlock;
+                }
+                updateShip(id, { isRotated: !isRotated, boardSquaresIds: newBoardSquaresIds })
             }
             return;
         }
         //if position is not available or mouse pointer is not on board then return ship to placement
         if (!isPositionOnBoardFound) {
-            updateShip(id,{coordinates:{ ...shipPlacements }, isRotated: isEditMode ? false : isRotated })
+            updateShip(id, { coordinates: { ...shipPlacements }, isRotated: isEditMode ? false : isRotated, boardSquaresIds: isEditMode?[]:[...boardSquaresIds] })
             return;
         }
         //if is edit mode off then return ship to its last placement on board;
         if (!isEditMode) {
-            updateShip(id,{placement: { ...shipCoordinates }});
+            updateShip(id, { placement: { ...shipCoordinates } });
         }
+
+        const shipElement = shipRef.current as HTMLDivElement;
+
+        shipElement.hidden = true;
+        const td = document.elementFromPoint(shipCoordinates.x + blockWidth / 2, shipCoordinates.y + blockHeight / 2 - window.scrollY) as HTMLTableCellElement;
+        const tr = td.parentNode as HTMLTableRowElement;
+        const colId = Array.from(tr.children as HTMLCollection).indexOf(td) - 1;
+        const rowId = Array.from(tr.parentNode?.children as HTMLCollection).indexOf(tr) - 1;
+        shipElement.hidden = false;
+
+        console.log(colId, rowId)
+        const shipBoardSquares = [rowId * 10 + colId];
+        for (let boardSquare = 1; boardSquare < shipSize; boardSquare++) {
+            const nextBoardSquareStep = isRotated ? 10 : 1;
+            shipBoardSquares[boardSquare] = shipBoardSquares[0] + nextBoardSquareStep * boardSquare;
+            
+        }
+        updateShip(id, { boardSquaresIds: shipBoardSquares })
         setMouseShifts({ shiftX: 0, shiftY: 0 });
         setIsPositionOnBoardFound(false);
         setIsPositionOnBoardConfirmed(true);

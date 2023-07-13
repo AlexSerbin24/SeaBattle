@@ -8,6 +8,7 @@ import {
     getSmallShipsDefaultCoordinates,
     getTinyShipsDefaultCoordinates
 } from '../../../../../../utils/shipsDefaultProperties';
+import getDestroyedShipBoardSquaresAround from '../../../../../../utils/getDestroyedShipBoardSquaresAround';
 import Ships from '../../../Ships/Ships';
 import UpdatedShip from '../../../../../../types/UpdatedShip';
 import Game from '../../../../../../types/Game';
@@ -16,6 +17,7 @@ import BoardSquareStatus from '../../../../../../types/BoardSquareStatus';
 import EditShipsPanel from '../EditShipsPanel';
 import SingleplayerBoard from './SingleplayerBoard';
 import MultiplayerBoard from './MultiplayerBoard';
+import isShipDestroyed from '../../../../../../utils/isShipDestroyed';
 
 
 type Props = {
@@ -36,48 +38,62 @@ export default function PlayerBoard({ game, isEditMode, username, trophies, setI
     const [ships, setShips] = useState<ShipsState>({
         // Initial state for ships
         largeShips: [
-            { id: 1, coordinates: { x: 0, y: 0 }, placement: { x: 0, y: 0 }, isRotated: false }
+            { id: 1, coordinates: { x: 0, y: 0 }, placement: { x: 0, y: 0 }, isRotated: false, boardSquaresIds: [] }
         ],
         mediumShips: [
-            { id: 2, coordinates: { x: 0, y: 0 }, placement: { x: 0, y: 0 }, isRotated: false },
-            { id: 3, coordinates: { x: 0, y: 0 }, placement: { x: 0, y: 0 }, isRotated: false }
+            { id: 2, coordinates: { x: 0, y: 0 }, placement: { x: 0, y: 0 }, isRotated: false, boardSquaresIds: [] },
+            { id: 3, coordinates: { x: 0, y: 0 }, placement: { x: 0, y: 0 }, isRotated: false, boardSquaresIds: [] }
         ],
         smallShips: [
-            { id: 4, coordinates: { x: 0, y: 0 }, placement: { x: 0, y: 0 }, isRotated: false },
-            { id: 5, coordinates: { x: 0, y: 0 }, placement: { x: 0, y: 0 }, isRotated: false },
-            { id: 6, coordinates: { x: 0, y: 0 }, placement: { x: 0, y: 0 }, isRotated: false }
+            { id: 4, coordinates: { x: 0, y: 0 }, placement: { x: 0, y: 0 }, isRotated: false, boardSquaresIds: [] },
+            { id: 5, coordinates: { x: 0, y: 0 }, placement: { x: 0, y: 0 }, isRotated: false, boardSquaresIds: [] },
+            { id: 6, coordinates: { x: 0, y: 0 }, placement: { x: 0, y: 0 }, isRotated: false, boardSquaresIds: [] }
         ],
         tinyShips: [
-            { id: 7, coordinates: { x: 0, y: 0 }, placement: { x: 0, y: 0 }, isRotated: false },
-            { id: 8, coordinates: { x: 0, y: 0 }, placement: { x: 0, y: 0 }, isRotated: false },
-            { id: 9, coordinates: { x: 0, y: 0 }, placement: { x: 0, y: 0 }, isRotated: false },
-            { id: 10, coordinates: { x: 0, y: 0 }, placement: { x: 0, y: 0 }, isRotated: false }
+            { id: 7, coordinates: { x: 0, y: 0 }, placement: { x: 0, y: 0 }, isRotated: false, boardSquaresIds: [] },
+            { id: 8, coordinates: { x: 0, y: 0 }, placement: { x: 0, y: 0 }, isRotated: false, boardSquaresIds: [] },
+            { id: 9, coordinates: { x: 0, y: 0 }, placement: { x: 0, y: 0 }, isRotated: false, boardSquaresIds: [] },
+            { id: 10, coordinates: { x: 0, y: 0 }, placement: { x: 0, y: 0 }, isRotated: false, boardSquaresIds: [] }
         ]
     });
+
     /** 
     * Function for hadnling opponent move in singleplayer and multiplayer. 
     * @param boardSquareId The board square that will be handle.
-    * @returns Object with "isHit" and "hittedBoardSquares" properties
+    * @returns Object with "isHit", "hittedBoardSquares" and "boardSquaresIdsAroundShip" properties.
     * First property explains whether opponent hit ship block or not.
     * Second property explains how many blocks was hitted.
+    * Third property uses for multiplayer mode for showing eliminating of ship
     */
-    function handleOpponentMove(boardSquareId: number) {
-        const gameBoard = gameBoardRef.current as HTMLTableElement;
+    function handleOpponentMove(boardSquareId: number, isMultiplayer:boolean = false) {
         let hittedBoardSquares = boardSquares.filter(boardSquare => boardSquare.status === "struck").length
+        let isDestroyed = false;
 
-        const boardSquaresBlocks = gameBoard.querySelectorAll("td");
-        const boardSquareBlock = boardSquaresBlocks[boardSquareId];
-        const { x, y } = boardSquareBlock.getBoundingClientRect();
-        const targetElements = document.elementsFromPoint(x + 22.5, y + 23 + window.scrollY);
-        const ship = targetElements.find(el => el.classList.contains("ship"));
-
-        const status: BoardSquareStatus = ship ? "struck" : "missed";
+        let boardSquaresIds: number[] = []
+        for (const key in ships) {
+            const shipType = key as keyof ShipsState;
+            boardSquaresIds = [...boardSquaresIds, ...ships[shipType].map(ship => ship.boardSquaresIds)].flat();
+        }
+        const status: BoardSquareStatus = boardSquaresIds.includes(boardSquareId) ? "struck" : "missed";
 
         setBoardSquares((prevState) => prevState.map(boardSquare => boardSquare.id == boardSquareId ? { ...boardSquare, status } : boardSquare));
 
-        if (status == "struck") hittedBoardSquares++;
+        let boardSquaresIdsAroundShip: number[] = [];
+        if (status == "struck") {
+            hittedBoardSquares++;
+            const { isRotated, boardSquaresIds: shipBoardSquares } = (Object.values(ships).flat())
+                .find((ship:Ship) => ship.boardSquaresIds.some((id) => id === boardSquareId)) as Ship;
 
-        return { isHit: status == "struck", hittedBoardSquares }
+            isDestroyed = isShipDestroyed(boardSquares, shipBoardSquares, boardSquareId);
+
+            if (isDestroyed) {
+                boardSquaresIdsAroundShip = getDestroyedShipBoardSquaresAround(shipBoardSquares, isRotated);
+                setBoardSquares((prevState) => prevState.map(boardSquare => boardSquaresIdsAroundShip.includes(boardSquare.id) ? { ...boardSquare, status: "missed" } : boardSquare));
+            }
+        };
+
+        
+        return { isHit: status == "struck", hittedBoardSquares, boardSquaresIdsAroundShip }
     }
     /**
      * Checks the game status based on the number of hitted board squares.
@@ -128,6 +144,11 @@ export default function PlayerBoard({ game, isEditMode, username, trophies, setI
         }
     }, []);
 
+    useEffect(() => {
+
+    }, [ships])
+
+
     //If game is closed set board squares to default state
     useEffect(() => {
         if (!game.isGameFinished) {
@@ -153,6 +174,8 @@ export default function PlayerBoard({ game, isEditMode, username, trophies, setI
             return updatedShips;
         });
     }
+
+
 
     return (
         <>

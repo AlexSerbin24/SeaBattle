@@ -58,7 +58,7 @@ export default function ShipPlacements({ allowedShips, updateShip, setEditMode }
   const resetButtonClickHandler = (event: React.MouseEvent<HTMLButtonElement>) => {
     for (const key in allowedShips) {
       const shipType = key as keyof ShipsState;
-      allowedShips[shipType].forEach(ship => updateShip(ship.id, { coordinates: { ...ship.placement }, isRotated: false }));
+      allowedShips[shipType].forEach(ship => updateShip(ship.id, { coordinates: { ...ship.placement }, isRotated: false, boardSquaresIds:[] }));
     }
   };
 

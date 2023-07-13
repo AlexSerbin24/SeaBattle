@@ -22,6 +22,10 @@ export default function OpponentBoard({ game, changeCurrentPlayer, finishGame }:
     function updateBorderSquareById(id:number, status:BoardSquareStatus){
         setBoardSquares((prevState=>prevState.map(boardSquare=>boardSquare.id == id? {...boardSquare,status}:boardSquare )));
     }
+
+    function destroyOpponentShip(boardSquaresIdsAroundShip:number[]){
+        setBoardSquares((prevState=>prevState.map(boardSquare=>boardSquaresIdsAroundShip.includes(boardSquare.id)? {...boardSquare,status:"missed"}:boardSquare ))); 
+    }
     return (
         <>
             {
@@ -33,14 +37,16 @@ export default function OpponentBoard({ game, changeCurrentPlayer, finishGame }:
                 changeCurrentPlayer={changeCurrentPlayer}
                 finishGame={finishGame}
                 boardSquares={boardSquares}
-                updateBorderSquareById={updateBorderSquareById}/>
+                updateBorderSquareById={updateBorderSquareById}
+                destroyOpponentShip={destroyOpponentShip}/>
                 :
                 <MultiplayerBoard 
                 room={game.gameOptions.room} 
                 opponent={game.gameOptions.opponent} 
                 opponentTrophies={game.gameOptions.opponentTrophies} 
                 boardSquares={boardSquares}
-                updateBorderSquareById={updateBorderSquareById}/>
+                updateBorderSquareById={updateBorderSquareById}
+                destroyOpponentShip={destroyOpponentShip}/>
             }
         </>
     )

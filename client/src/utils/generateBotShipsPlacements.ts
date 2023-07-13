@@ -1,10 +1,12 @@
+import BotShip from "../types/BotShip";
+
 //should return indexes of board squares;
 export default function generateBotShipsPlacements() {
-  const occupiedCells: number[] = [];
+  const botShips: BotShip[] = [];
   const availableCells = Array.from({ length: 100 }, (_, index) => index);
 
   function isBoardSquareOccupied(cell: number) {
-    return occupiedCells.includes(cell);
+    return botShips.map(botShip=>botShip.boardSquaresIds).flat().includes(cell);
   }
   function isNeighboringBoardSquaresOccupied(blockIndex:number, cellId:number, direction:string) {
     const rowIndex = Math.floor(cellId / 10); // Индекс строки клетки
@@ -79,7 +81,9 @@ export default function generateBotShipsPlacements() {
     }
 
     if (validPlacement) {
-      occupiedCells.push(...shipCells);
+      const isRotated = direction == "vertical";
+
+      botShips.push({isRotated, boardSquaresIds:shipCells});
     } else {
       placeShip(shipSize); // Try again with a new startCell
     }
@@ -95,6 +99,6 @@ export default function generateBotShipsPlacements() {
 
   generateShips();
 
-  return occupiedCells;
+  return botShips;
 }
 

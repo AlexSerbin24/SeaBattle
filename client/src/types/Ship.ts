@@ -3,4 +3,5 @@ export default interface Ship{
     coordinates: { x: number; y: number };
     placement: { x: number; y: number };
     isRotated: boolean;
+    boardSquaresIds:number[]
 }

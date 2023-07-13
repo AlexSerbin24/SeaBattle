@@ -18,8 +18,8 @@ export default function registerGameHandlers(io: Server, socket: Socket) {
         socket.broadcast.to(room).emit("game:player move(client)", boardSquareId);
     });
 
-    socket.on("game:player move finished", (room: string, boardSquareId: number, isHit: boolean) => {
-        socket.broadcast.to(room).emit("game:player move finished(client)", boardSquareId, isHit);
+    socket.on("game:player move finished", (room: string, boardSquareId: number, isHit: boolean, boardSquaresIdsAroundShip:number[]) => {
+        socket.broadcast.to(room).emit("game:player move finished(client)", boardSquareId, isHit,boardSquaresIdsAroundShip);
     });
 
     socket.on("game:change current player", (room: string, isHit: boolean, currentPlayerName: string, waitingPlayerName: string) => {

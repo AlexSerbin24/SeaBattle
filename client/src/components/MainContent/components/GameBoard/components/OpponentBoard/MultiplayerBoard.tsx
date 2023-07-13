@@ -11,10 +11,11 @@ type Props = {
     boardSquares: BoardSquareState[],
     opponent:string,
     opponentTrophies:number,
-    updateBorderSquareById:(id: number, status: BoardSquareStatus)=>void
+    updateBorderSquareById:(id: number, status: BoardSquareStatus)=>void,
+    destroyOpponentShip:(boardSquaresIdsAroundShip: number[])=> void
 }
 
-export default function MultiplayerBoard({ room, boardSquares, opponent, opponentTrophies,updateBorderSquareById }: Props) {
+export default function MultiplayerBoard({ room, boardSquares, opponent, opponentTrophies,updateBorderSquareById, destroyOpponentShip }: Props) {
     const socket = useSocket();
 
     /**
@@ -32,9 +33,12 @@ export default function MultiplayerBoard({ room, boardSquares, opponent, opponen
     //Opponent board always will be if isGameStarted equals true
     useEffect(() => {
         // Function to handle player move finished message
-        const playerFinishMove = (boardSquareId: number, isHit: boolean) => {
+        const playerFinishMove = (boardSquareId: number, isHit: boolean, boardSquaresIdsAroundShip:number[]) => {
             const status: BoardSquareStatus = isHit ? "struck" : "missed";
             updateBorderSquareById(boardSquareId, status);
+            if(boardSquaresIdsAroundShip.length){
+                destroyOpponentShip(boardSquaresIdsAroundShip);
+            }
         }
 
         // Register the socket event listener when component mounts

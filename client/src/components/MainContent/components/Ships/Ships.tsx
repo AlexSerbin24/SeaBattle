@@ -31,6 +31,7 @@ export default function Ships({ isEditMode, isGameStarted, allowedShips, updateS
             isGameStarted={isGameStarted}
             shipCoordinates={ship.coordinates}
             shipPlacements={ship.placement }
+            boardSquaresIds={ship.boardSquaresIds}
             updateShip={updateShip}
           />
         );
