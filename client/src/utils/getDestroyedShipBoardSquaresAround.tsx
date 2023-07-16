@@ -3,7 +3,6 @@ export default function getDestroyedShipBoardSquaresAround(shipBoardSquares: num
     const boardSquaresIdsAroundShip = [];
     const [xFinishOffset, yFinishOffset] = isRotated ? [2, shipSize + 1] : [shipSize + 1, 2];
     const firstShipBoardSquareId = shipBoardSquares[0];
-    console.log(firstShipBoardSquareId)
     for (let xOffset = -1; xOffset < xFinishOffset; xOffset++) {
         //Is pressed to left side
         const isPressedToLeft = firstShipBoardSquareId % 10 == 0;

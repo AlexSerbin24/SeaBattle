@@ -27,7 +27,7 @@ export default function OpponentBoard({ game, changeCurrentPlayer, finishGame }:
         setBoardSquares((prevState=>prevState.map(boardSquare=>boardSquaresIdsAroundShip.includes(boardSquare.id)? {...boardSquare,status:"missed"}:boardSquare ))); 
     }
     return (
-        <>
+        <div>
             {
                 game.gameOptions.type == "singleplayer"
                 ?
@@ -48,6 +48,6 @@ export default function OpponentBoard({ game, changeCurrentPlayer, finishGame }:
                 updateBorderSquareById={updateBorderSquareById}
                 destroyOpponentShip={destroyOpponentShip}/>
             }
-        </>
+        </div>
     )
 }

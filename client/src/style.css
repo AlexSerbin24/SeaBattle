@@ -1,3 +1,5 @@
+
+/*Global styles*/
 #root {
   display: flex;
   flex-direction: column;
@@ -30,6 +32,49 @@ header {
   background: linear-gradient(90deg, rgba(2, 0, 36, 1) 0%, rgba(30, 30, 153, 1) 0%, rgba(0, 196, 255, 1) 100%);
   box-shadow: 0 0 2px;
 }
+
+/*h3 and td*/
+h3,
+th {
+  font-size: 21px;
+}
+
+/*Media for global styles*/
+@media (max-width: 1239px) {
+  header {
+    font-size: 27px;
+  }
+
+  h3,
+  th {
+    font-size: 19px;
+  }
+}
+
+@media (max-width: 764px) {
+  header {
+    font-size: 23px;
+  }
+
+  h3,
+  th {
+    font-size: 16px;
+    margin: 10px;
+  }
+}
+
+@media (max-width: 619px) {
+  header {
+    font-size: 20px;
+  }
+
+  h3,
+  th {
+    font-size: 14px;
+    margin: 7px;
+  }
+}
+
 
 /*Waiting block*/
 
@@ -72,31 +117,64 @@ header {
 
 main {
   box-sizing: border-box;
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: baseline;
   background-color: white;
   height: 100%;
   padding: 3pc 3pc 0;
 }
+
+
+
 
 .main-container {
   background-color: rgb(248, 248, 248);
   flex: 1;
 }
 
+.main-content {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+/*Media for main*/
+
+@media (max-width: 764px) {
+  main {
+    padding: 2pc 2pc 0;
+  }
+}
+
+@media (max-width: 619px) {
+  main {
+    padding: 1pc 1pc 0;
+  }
+}
+
 /*Menu*/
 
 .menu {
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
-  margin-right: 16pc;
 }
 
 .menu>* {
   margin-bottom: 8px;
 }
+
+/*Media for menu*/
+@media (max-width: 469px) {
+  .menu {
+    order: -1;
+  }
+
+  .main-content {
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
 
 
 /*Game board*/
@@ -107,17 +185,70 @@ main {
   margin-bottom: 10px;
 }
 
+@media (min-width: 620px) {
+  .player-info {
+    text-align: center;
+  }
+}
+
+
+@media (max-width: 1239px) {
+  .board {
+    width: 330px;
+    height: 341px;
+  }
+}
+
+@media (max-width: 764px) {
+  .board {
+    width: 275px;
+    height: 286px;
+  }
+
+}
+
+@media (min-width: 470px) and (max-width: 619px) {
+  .main-content:not(:has(.menu)) {
+    flex-direction: column;
+    align-items: center;
+  }
+
+}
+
+/*Board th and td*/
 .board th,
 .board td {
   width: 45px;
   height: 46px;
   box-sizing: border-box;
 }
-
 .board td {
   padding: 0;
 }
 
+/*Board th and td media*/
+@media (max-width: 1239px) {
+
+  .board th,
+  .board td {
+    width: 30px;
+    height: 31px;
+    box-sizing: border-box;
+  }
+}
+
+@media (max-width: 764px) {
+
+  .board th,
+  .board td {
+    width: 25px;
+    height: 26px;
+    box-sizing: border-box;
+  }
+}
+
+
+/*Board square content*/
 .board-square {
   border: 1px solid rgb(19, 150, 193);
 }
@@ -171,12 +302,40 @@ main {
   transform: translate(-50%, -50%) rotate(-45deg);
 }
 
+
+/*Board square content media*/
+@media (max-width: 1239px) {
+
+  .board-square-content.struck::before,
+  .board-square-content.struck::after {
+    width: 40px;
+  }
+
+  .board-square-content.missed::before {
+    width: 3px;
+    height: 3px;
+  }
+}
+
+@media (max-width: 764px) {
+
+  .board-square-content.struck::before,
+  .board-square-content.struck::after {
+    width: 33px;
+  }
+
+  .board-square-content.missed::before {
+    width: 2px;
+    height: 2px;
+  }
+}
+
+
 /*Ships*/
 
 .ship {
   border: 2px solid rgb(72, 72, 251);
   background: rgba(195, 208, 228, 0.6);
-  height: 46px;
   box-sizing: border-box;
   cursor: move;
 }
@@ -213,6 +372,15 @@ main {
   z-index: 1000;
 }
 
+/*Ships media*/
+
+@media (max-width: 764px) {
+  .ship {
+    border: 1px solid rgb(72, 72, 251);
+  }
+
+}
+
 /*Footer*/
 footer {
   align-items: end;
@@ -222,6 +390,28 @@ footer {
   color: white;
   background: rgb(104, 154, 225);
   background: linear-gradient(90deg, rgba(104, 154, 225, 1) 0%, rgba(13, 94, 200, 1) 100%);
+}
+
+/*Footer media*/
+@media (max-width: 1239px) {
+  footer {
+    padding: 10px;
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 764px) {
+  footer {
+    padding: 8px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 619px) {
+  footer {
+    padding: 6px;
+    font-size: 12px;
+  }
 }
 
 
@@ -259,4 +449,5 @@ footer {
 .edit-ships-btn {
   background: rgb(77, 90, 243);
   background: linear-gradient(176deg, rgba(77, 90, 243, 1) 0%, rgba(115, 168, 255, 1) 100%);
+  margin-bottom: 20px;
 }

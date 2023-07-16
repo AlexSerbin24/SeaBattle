@@ -1,7 +1,12 @@
 .container {
-    /* padding-left: 14%;
-    padding-right: 14%; */
 
-    padding-left: 100px;
-    padding-right:100px;
+    padding-left: 65px;
+    padding-right:65px;
+  }
+
+  @media (max-width: 899px) {
+     .container{
+      padding-left: 0;
+      padding-right: 0;
+    } 
   }

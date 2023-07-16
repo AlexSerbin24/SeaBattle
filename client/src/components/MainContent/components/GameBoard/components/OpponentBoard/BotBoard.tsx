@@ -60,9 +60,9 @@ export default function BotBoard({boardSquares, opponent,opponentTrophies, updat
         }
     }
     return (
-        <div>
+        <>
             <GameBoard  isGameStarted={true}  boardSquares={boardSquares} boardSquareClickHandler={boardSquareClickHandler}/>
             <PlayerInfo playername={opponent} trophies={opponentTrophies} />
-        </div>
+        </>
     );
 }

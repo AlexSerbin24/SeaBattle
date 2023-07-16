@@ -65,7 +65,7 @@ export default function PlayerBoard({ game, isEditMode, username, trophies, setI
     * Second property explains how many blocks was hitted.
     * Third property uses for multiplayer mode for showing eliminating of ship
     */
-    function handleOpponentMove(boardSquareId: number, isMultiplayer:boolean = false) {
+    function handleOpponentMove(boardSquareId: number) {
         let hittedBoardSquares = boardSquares.filter(boardSquare => boardSquare.status === "struck").length
         let isDestroyed = false;
 
@@ -144,11 +144,6 @@ export default function PlayerBoard({ game, isEditMode, username, trophies, setI
         }
     }, []);
 
-    useEffect(() => {
-
-    }, [ships])
-
-
     //If game is closed set board squares to default state
     useEffect(() => {
         if (!game.isGameFinished) {
@@ -178,8 +173,8 @@ export default function PlayerBoard({ game, isEditMode, username, trophies, setI
 
 
     return (
-        <>
-            <Ships isEditMode={isEditMode} allowedShips={ships} isGameStarted={game.isGameStarted} updateShip={updateShipById} />
+        <div>
+            <Ships isEditMode={isEditMode} allowedShips={ships} isGameStarted={game.isGameStarted} updateShip={updateShipById}  gameBoardRef={gameBoardRef}/>
             {
                 game.gameOptions.type == "singleplayer"
                     ?
@@ -216,6 +211,6 @@ export default function PlayerBoard({ game, isEditMode, username, trophies, setI
                 :
                 <PlayerInfo playername={username} trophies={trophies} />
             }
-        </>
+        </div>
     );
 }

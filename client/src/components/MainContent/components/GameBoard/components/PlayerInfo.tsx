@@ -6,9 +6,9 @@ type Props={
 }
 export default function PlayerInfo({playername, trophies}:Props) {
     return (
-        <>
-            <h3 style={{ textAlign: "center" }}>{playername}</h3>
-            <h3 style={{ textAlign: "center" }}>Trophies: {trophies}</h3>
-        </>
+        <div className='player-info'>
+            <h3>{playername}</h3>
+            <h3>Trophies: {trophies}</h3>
+        </div>
     )
 }

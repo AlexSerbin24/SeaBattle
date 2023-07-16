@@ -8,11 +8,12 @@ type Props = {
   allowedShips: ShipsState;
   isEditMode: boolean;
   isGameStarted: boolean;
+  gameBoardRef:React.RefObject<HTMLTableElement>,
   updateShip: (id: number, data: UpdatedShip)=>void;
 };
 
 
-export default function Ships({ isEditMode, isGameStarted, allowedShips, updateShip }: Props) {
+export default function Ships({ isEditMode, isGameStarted, allowedShips, gameBoardRef, updateShip }: Props) {
 
   const ships = useMemo(() => {
     const result: React.JSX.Element[] = [];
@@ -32,6 +33,7 @@ export default function Ships({ isEditMode, isGameStarted, allowedShips, updateS
             shipCoordinates={ship.coordinates}
             shipPlacements={ship.placement }
             boardSquaresIds={ship.boardSquaresIds}
+            gameBoardRef={gameBoardRef}
             updateShip={updateShip}
           />
         );

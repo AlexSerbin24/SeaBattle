@@ -51,9 +51,9 @@ export default function MultiplayerBoard({ room, boardSquares, opponent, opponen
     }, []);
 
     return (
-        <div>
+        <>
             <GameBoard isGameStarted={true} boardSquares={boardSquares} boardSquareClickHandler={boardSquareClickHandler}/>
             <PlayerInfo playername={opponent} trophies={opponentTrophies} />
-        </div>
+        </>
     );
 }

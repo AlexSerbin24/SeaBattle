@@ -39,7 +39,7 @@ export default function ShipPlacements({ allowedShips, updateShip, setEditMode }
     placements.push(
       <div key={`rowForShipSize${shipSize}`} className='ship-placement-row'>
         {currentShips.map(ship => (
-          <ShipPlacement key={`placementForShip${ship.id}`} shipId={ship.id} shipSize={shipSize} updateShip={updateShip} />
+          <ShipPlacement key={`placementForShip${ship.id}`} shipId={ship.id} shipSize={shipSize} updateShip={updateShip} isNotOnBoard={ship.boardSquaresIds.length == 0} />
         ))}
       </div>
     );
@@ -64,11 +64,11 @@ export default function ShipPlacements({ allowedShips, updateShip, setEditMode }
 
   return (
     <div className='ships-placements'>
-      <p style={{ textAlign: "center" }}>
+      <h3 style={{ textAlign: "center" }}>
         Your board.
         <br />
         Arrange the ships that are available below.
-      </p>
+      </h3>
       {placements}
       <div>
         <Button disabled={checkIfShipsOnBoard()} className='save-ships-btn' onClick={saveButtonClickHandler}>

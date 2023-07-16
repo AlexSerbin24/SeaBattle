@@ -28,22 +28,22 @@ export default function MainContent() {
     opponentTrophies: 0,
     type: "singleplayer"
   }
-  
+
   const [game, setGame] = useState<Game>({ isGameStarted: false, isGameFinished: false, gameOptions: defaultGameOptions });
 
   /**
    * Start game. According to game type change game options.
    * @param gameOptions Game options. By default it is for singleplayer
    */
-  const startGame = (gameOptions:GameOptions = defaultGameOptions)=>{
-    setGame({gameOptions, isGameStarted:true, isGameFinished:false})
+  const startGame = (gameOptions: GameOptions = defaultGameOptions) => {
+    setGame({ gameOptions, isGameStarted: true, isGameFinished: false })
   }
 
   /**
    * Change current player
    * @param nextMovePlayer Player that will make move
    */
-  const changeCurrentPlayer = (nextMovePlayer: string)=>{
+  const changeCurrentPlayer = (nextMovePlayer: string) => {
     const gameOptions = { ...game.gameOptions, currentPlayer: nextMovePlayer } as GameOptions;
     setGame(prevState => ({ ...prevState, gameOptions })); //change currentPlayer
   }
@@ -54,24 +54,27 @@ export default function MainContent() {
    * @param opponentTrophies New opponent trophies value. Default opponent is bot so default trophies value is 0
    */
   const finishGame = (userTrophies: number = user?.trophies ?? 0, opponentTrophies: number = 0) => {
-    setUser(prevState => {
-      const userState = { ...prevState as User };
-      return { ...userState, trophies: userTrophies };
-    });
+    if (game.gameOptions.type == "multiplayer") {
+      setUser(prevState => {
+        const userState = { ...prevState as User };
+        return { ...userState, trophies: userTrophies };
+      })
 
+    }
     // Update game state to mark it as finished and update opponent trophies
     setGame(prevState => {
       const gameOptions = { ...prevState.gameOptions } as GameOptions;
       gameOptions.opponentTrophies = opponentTrophies;
       return { ...prevState, isGameFinished: true, gameOptions };
     }); //finish game
+
   }
 
   /**
    * Close game function. It returns player to main menu
    */
-  const closeGame = ()=>{
-    setGame({ isGameStarted: false, gameOptions: defaultGameOptions, isGameFinished: false }); 
+  const closeGame = () => {
+    setGame({ isGameStarted: false, gameOptions: defaultGameOptions, isGameFinished: false });
   }
 
   useEffect(() => {
@@ -132,39 +135,43 @@ export default function MainContent() {
           setIsLoginModalVisible={setIsLoginModalVisible}
         />
 
-        <div>
-          {/* Player's game board */}
-          <PlayerBoard
-            game={game}
-            changeCurrentPlayer={changeCurrentPlayer}
-            finishGame={finishGame}
-            username={user?.username ?? "Player"}
-            trophies={user?.trophies ?? 0}
-            isEditMode={isEditMode}
-            setIsEditMode={setIsEditMode}
-            editShipsButtonClickHandler={editShipsButtonClickHandler}
-          />
-        </div>
-
         {/* Show current player or winner */}
-        {game.isGameStarted && (
-          <PlayerStatus isGameFinished={game.isGameFinished} currentPlayer={game.gameOptions?.currentPlayer as string} />
-        )}
-
-        {/* Show opponent's game board or menu */}
         {game.isGameStarted ?
-          <OpponentBoard game={game} changeCurrentPlayer={changeCurrentPlayer} finishGame={finishGame} />
+
+          <PlayerStatus isGameFinished={game.isGameFinished} currentPlayer={game.gameOptions?.currentPlayer as string} />
           :
-          <Menu
-            isEditMode={isEditMode}
-            setLoading={setLoading}
-            user={user}
-            setUser={setUser}
-            startGame={startGame}
-            setIsRegisterModalVisible={setIsRegisterModalVisible}
-            setIsLoginModalVisible={setIsLoginModalVisible}
-          />
+          <h3 style={{ textAlign: "center" }}>Place your ships</h3>
         }
+
+        <div className='main-content'>
+            {/* Player's game board */}
+            <PlayerBoard
+              game={game}
+              changeCurrentPlayer={changeCurrentPlayer}
+              finishGame={finishGame}
+              username={user?.username ?? "Player"}
+              trophies={user?.trophies ?? 0}
+              isEditMode={isEditMode}
+              setIsEditMode={setIsEditMode}
+              editShipsButtonClickHandler={editShipsButtonClickHandler}
+            />
+
+          {/* Show opponent's game board or menu */}
+            {game.isGameStarted ?
+              <OpponentBoard game={game} changeCurrentPlayer={changeCurrentPlayer} finishGame={finishGame} />
+              :
+              <Menu
+                isEditMode={isEditMode}
+                setLoading={setLoading}
+                user={user}
+                setUser={setUser}
+                startGame={startGame}
+                setIsRegisterModalVisible={setIsRegisterModalVisible}
+                setIsLoginModalVisible={setIsLoginModalVisible}
+              />
+            }
+
+        </div>
       </main>
     </Container>
   );
