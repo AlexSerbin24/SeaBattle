@@ -26,7 +26,7 @@ type Props = {
     username: string,
     trophies: number,
     changeCurrentPlayer: (nextMovePlayer: string) => void,
-    finishGame: (userTrophies?: number, opponentTrophies?: number) => void,
+    finishGame: (winner:string, userTrophies?: number, opponentTrophies?: number) => void,
     setIsEditMode: React.Dispatch<React.SetStateAction<boolean>>;
     editShipsButtonClickHandler: ((event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void);
 };
@@ -181,6 +181,7 @@ export default function PlayerBoard({ game, isEditMode, username, trophies, setI
                     <SingleplayerBoard
                         ref={gameBoardRef}
                         isGameStarted={game.isGameStarted}
+                        isGameFinished = {game.isGameFinished}
                         username={username}
                         currentPlayer={game.gameOptions.currentPlayer}
                         boardSquares={boardSquares}
@@ -191,6 +192,7 @@ export default function PlayerBoard({ game, isEditMode, username, trophies, setI
                     :
                     <MultiplayerBoard
                         ref={gameBoardRef}
+                        isGameFinished={game.isGameFinished}
                         gameOptions={game.gameOptions}
                         username={username}
                         trophies={trophies}

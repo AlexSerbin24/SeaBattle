@@ -7,11 +7,12 @@ import BoardSquareStatus from '../../../../../../types/BoardSquareStatus'
 
 type Props = {
     game: Game,
+    username:string,
     changeCurrentPlayer: (nextMovePlayer: string) => void,
-    finishGame: (userTrophies?: number, opponentTrophies?: number) => void,
+    finishGame: (winner:string, userTrophies?: number, opponentTrophies?: number) => void,
 }
 
-export default function OpponentBoard({ game, changeCurrentPlayer, finishGame }: Props) {
+export default function OpponentBoard({ game, username, changeCurrentPlayer, finishGame }: Props) {
     const [boardSquares, setBoardSquares] = useState<BoardSquareState[]>(Array.from({ length: 100 }, (_, index) => ({ id: index, status: "default" })));
 
     /**
@@ -32,6 +33,7 @@ export default function OpponentBoard({ game, changeCurrentPlayer, finishGame }:
                 game.gameOptions.type == "singleplayer"
                 ?
                 <BotBoard 
+                username={username}
                 opponent={game.gameOptions.opponent} 
                 opponentTrophies={game.gameOptions.opponentTrophies} 
                 changeCurrentPlayer={changeCurrentPlayer}

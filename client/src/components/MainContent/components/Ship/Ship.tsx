@@ -64,7 +64,6 @@ export default function Ship({ id, shipSize, isGameStarted, isEditMode, shipCoor
     
 
     useEffect(() => {
-        if (isGameStarted) {
             if (window.innerWidth < 620) {
 
                 const gameBoard = gameBoardRef.current as HTMLTableElement;
@@ -73,7 +72,7 @@ export default function Ship({ id, shipSize, isGameStarted, isEditMode, shipCoor
                 const { x, y } = td.getBoundingClientRect();
                 updateShip(id, { coordinates: { x, y: y + window.scrollY } });
             }
-        }
+        
     }, [isGameStarted])
 
 

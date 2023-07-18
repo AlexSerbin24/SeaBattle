@@ -38,10 +38,10 @@ export default function registerGameHandlers(io: Server, socket: Socket) {
         else
             await UserService.updateUserTrophies(loserName, -loserTrophies);
 
-        io.to(room).emit("game:game over", winnerTrophies + trophiesChange, loserTrophies >= trophiesChange ? loserTrophies - trophiesChange : 0);
+        io.to(room).emit("game:game over", winnerName, winnerTrophies + trophiesChange, loserTrophies >= trophiesChange ? loserTrophies - trophiesChange : 0);
 
         io.socketsLeave(room);
         io.sockets.adapter.rooms.delete(room);
-    })
+    });
 
 }

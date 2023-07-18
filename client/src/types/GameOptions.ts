@@ -4,7 +4,8 @@ type GameOptions = {
     type: GameType,
     opponent:string,
     opponentTrophies:number,
-    currentPlayer:string
+    currentPlayer:string,
+    winner:string,
 }
 
 export default GameOptions;

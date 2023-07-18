@@ -7,18 +7,19 @@ import GameOptions from '../../../../../../types/GameOptions';
 
 // Multiplayer player board  always has isGameStarted true
 type Props = {
+    isGameFinished: boolean,
     gameOptions: GameOptions,
     boardSquares: BoardSquareState[],
     username: string,
     trophies: number,
-    handleOpponentMove:(boardSquareId: number)=> { isHit: boolean, hittedBoardSquares: number, boardSquaresIdsAroundShip:number[] },
-    checkGameStatus:(hittedBoardSquares: number, continueGame: () => void, finishGame: () => void)=>void,
+    handleOpponentMove: (boardSquareId: number) => { isHit: boolean, hittedBoardSquares: number, boardSquaresIdsAroundShip: number[] },
+    checkGameStatus: (hittedBoardSquares: number, continueGame: () => void, finishGame: () => void) => void,
     changeCurrentPlayer: (nextMovePlayer: string) => void,
-    finishGame: (userTrophies?: number, opponentTrophies?: number) => void
+    finishGame: (winner: string, userTrophies?: number, opponentTrophies?: number) => void
 }
 
 
-export default forwardRef(function MultiplayerBoard({ gameOptions, boardSquares, username, trophies, handleOpponentMove, checkGameStatus, changeCurrentPlayer, finishGame }: Props, ref: ForwardedRef<HTMLTableElement>) {
+export default forwardRef(function MultiplayerBoard({ isGameFinished, gameOptions, boardSquares, username, trophies, handleOpponentMove, checkGameStatus, changeCurrentPlayer, finishGame }: Props, ref: ForwardedRef<HTMLTableElement>) {
     const socket = useSocket();
     useEffect(() => {
         const changingCurrentPlayer = (nextMovePlayer: string) => {
@@ -26,19 +27,18 @@ export default forwardRef(function MultiplayerBoard({ gameOptions, boardSquares,
         };
 
 
-        const gameOver = (winnerTrophies: number, loserTrophies: number) => {
+        const gameOver = (winner: string, winnerTrophies: number, loserTrophies: number) => {
             // Update user trophies based on the game result
             const [userTrophies, opponentTrophies] =
-                username === gameOptions?.currentPlayer
+                username === winner
                     ? [winnerTrophies, loserTrophies]
                     : [loserTrophies, winnerTrophies];
-
-            finishGame(userTrophies, opponentTrophies);
+            finishGame(winner, userTrophies, opponentTrophies);
         };
 
 
         const opponentMove = (borderSquareId: number) => {
-            const {isHit, hittedBoardSquares, boardSquaresIdsAroundShip} = handleOpponentMove(borderSquareId);
+            const { isHit, hittedBoardSquares, boardSquaresIdsAroundShip } = handleOpponentMove(borderSquareId);
 
             const { room, currentPlayer, opponentTrophies } = gameOptions;
             // Notify the opponent that the move has finished
@@ -63,6 +63,29 @@ export default forwardRef(function MultiplayerBoard({ gameOptions, boardSquares,
             socket.offMessage("game:player move(client)", opponentMove);
         };
     }, [gameOptions.currentPlayer, boardSquares])
+
+    useEffect(() => {
+
+        if (!isGameFinished) {
+            console.log(gameOptions)
+            const beforeUnloadEventHandler = (event: BeforeUnloadEvent) => {
+                const confirmationMessage = `Are you sure you want to leave while game is continuing?`;
+                event.returnValue = confirmationMessage;
+            }
+            const unloadEventHandler = (event: Event) => {
+                const { room, opponent, opponentTrophies } = gameOptions;
+
+                socket.sendMessage("game:game over", room, opponent, opponentTrophies, username, trophies)
+            }
+            window.addEventListener("beforeunload", beforeUnloadEventHandler);
+            window.addEventListener('unload', unloadEventHandler);
+            return () => {
+                window.removeEventListener("beforeunload", beforeUnloadEventHandler);
+                window.removeEventListener("unload", unloadEventHandler);
+            }
+        }
+    }, [gameOptions, isGameFinished])
+
 
     return (
         <GameBoard ref={ref} isGameStarted={true} boardSquares={boardSquares} />

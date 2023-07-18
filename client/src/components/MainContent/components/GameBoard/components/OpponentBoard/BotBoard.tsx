@@ -10,14 +10,15 @@ import BotShip from '../../../../../../types/BotShip';
 
 type Props = {
     boardSquares: BoardSquareState[],
+    username:string,
     opponent:string,
     opponentTrophies:number,
     updateBorderSquareById:(id: number, status: BoardSquareStatus)=>void,
     changeCurrentPlayer: (nextMovePlayer: string) => void,
-    finishGame: (userTrophies?: number, opponentTrophies?: number) => void,
+    finishGame: (winner:string, userTrophies?: number, opponentTrophies?: number) => void,
     destroyOpponentShip:(boardSquaresIdsAroundShip: number[])=> void
 }
-export default function BotBoard({boardSquares, opponent,opponentTrophies, updateBorderSquareById,  changeCurrentPlayer, finishGame, destroyOpponentShip}:Props) {
+export default function BotBoard({username, boardSquares, opponent,opponentTrophies, updateBorderSquareById,  changeCurrentPlayer, finishGame, destroyOpponentShip}:Props) {
 
     const [botShips] = useState(generateBotShipsPlacements());
 
@@ -54,7 +55,7 @@ export default function BotBoard({boardSquares, opponent,opponentTrophies, updat
                 destroyOpponentShip(boardSquaresIdsAroundShip);
             }
             //Finish game if hittedBoardSquares equal 20
-            if(hittedBoardSquares == 20) finishGame();
+            if(hittedBoardSquares == 20) finishGame(username);
             
 
         }
