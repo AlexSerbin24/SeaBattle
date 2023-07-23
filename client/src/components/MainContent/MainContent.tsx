@@ -5,7 +5,6 @@ import LoginModal from './components/Modals/LoginModal';
 import RegisterModal from './components/Modals/RegisterModal';
 import User from '../../types/User';
 import UserService from '../../services/UserService';
-import { AxiosError } from 'axios';
 import Game from '../../types/Game';
 import Loader from '../UI/Loader/Loader';
 import OpponentBoard from './components/GameBoard/components/OpponentBoard/OpponentBoard';
@@ -125,13 +124,11 @@ export default function MainContent() {
         <RegisterModal
           setLoading={setLoading}
           isRegisterModalVisible={isRegisterModalVisible}
-          setUser={setUser}
           setIsRegisterModalVisible={setIsRegisterModalVisible}
         />
         <LoginModal
           setLoading={setLoading}
           isLoginModalVisible={isLoginModalVisible}
-          setUser={setUser}
           setIsLoginModalVisible={setIsLoginModalVisible}
         />
 
@@ -166,8 +163,6 @@ export default function MainContent() {
             <Menu
               isEditMode={isEditMode}
               setLoading={setLoading}
-              user={user}
-              setUser={setUser}
               startGame={startGame}
               setIsRegisterModalVisible={setIsRegisterModalVisible}
               setIsLoginModalVisible={setIsLoginModalVisible}

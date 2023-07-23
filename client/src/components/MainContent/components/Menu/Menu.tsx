@@ -5,18 +5,18 @@ import UserService from '../../../../services/UserService';
 import useSocket from '../../../../hooks/useSocket';
 import GameOptions from '../../../../types/GameOptions';
 import Modal from '../../../UI/Modal/Modal';
+import { useUserContext } from '../../../../contexts/userContext';
 
 type Props = {
     isEditMode: boolean,
-    user: User | null,
     setLoading: React.Dispatch<React.SetStateAction<boolean>>,
-    setUser: React.Dispatch<React.SetStateAction<User | null>>,
     startGame: (gameOptions?: GameOptions) => void,
     setIsLoginModalVisible: React.Dispatch<React.SetStateAction<boolean>>,
     setIsRegisterModalVisible: React.Dispatch<React.SetStateAction<boolean>>
 };
 
-export default function Menu({ user, isEditMode, setUser, setLoading, startGame, setIsLoginModalVisible, setIsRegisterModalVisible }: Props) {
+export default function Menu({isEditMode, setLoading, startGame, setIsLoginModalVisible, setIsRegisterModalVisible }: Props) {
+    const{user,setUser} = useUserContext();
     const webSocket = useSocket();
     const [currentUserOnlineCount, setCurrentUserOnlineCount] = useState(0);
     const [errorModal, setErrorModal] = useState(false);

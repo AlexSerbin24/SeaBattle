@@ -4,17 +4,17 @@ import Input from '../../../UI/Input/Input';
 import { RegisterData } from '../../../../types/UserData';
 import Button from '../../../UI/Button/Button';
 import { RegisterFormErrors } from '../../../../types/UserFormsErrors';
-import User from '../../../../types/User';
 import UserService from '../../../../services/UserService';
 import { AxiosError } from 'axios';
+import { useUserContext } from '../../../../contexts/userContext';
 
 type Props = {
     isRegisterModalVisible: boolean,
     setLoading:React.Dispatch<React.SetStateAction<boolean>>,
-    setUser: React.Dispatch<React.SetStateAction<User | null>>,
     setIsRegisterModalVisible: React.Dispatch<React.SetStateAction<boolean>>
 }
-export default function RegisterModal({ isRegisterModalVisible, setUser, setLoading, setIsRegisterModalVisible }: Props) {
+export default function RegisterModal({ isRegisterModalVisible, setLoading, setIsRegisterModalVisible }: Props) {
+    const {setUser} = useUserContext();
     const [registerData, setRegisterData] = useState<RegisterData>({ email: "", password: "", username: "" });
     const [errors, setErrors] = useState<RegisterFormErrors>({ email: "", password: "", username: "", server: "" });
 

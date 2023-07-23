@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { ShipSize } from '../../../../types/ShipSize';
 import UpdatedShip from '../../../../types/UpdatedShip';
 import getShipBlockDimension from '../../../../utils/getShipBlockDimensions';
+import getEventPageCoordinates from '../../../../utils/getMouseTouchPageEvent';
 
 type Props = {
     id: number,
@@ -37,7 +38,7 @@ export default function Ship({ id, shipSize, isGameStarted, isEditMode, shipCoor
     useEffect(() => {
         function handleResize() {
 
-            const {width,height} = getShipBlockDimension();
+            const { width, height } = getShipBlockDimension();
 
             setShipBlockDimensions({ width, height });
         }
@@ -56,23 +57,23 @@ export default function Ship({ id, shipSize, isGameStarted, isEditMode, shipCoor
             const firstBoardSquareId = boardSquaresIds[0];
             const td = gameBoard.querySelectorAll("td").item(firstBoardSquareId);
             const { x, y } = td.getBoundingClientRect();
-            const updatedShip = isEditMode?{ coordinates: { x, y: y + window.scrollY }}:{ coordinates: { x, y: y + window.scrollY }, placement: { x, y: y + window.scrollY } };
+            const updatedShip = isEditMode ? { coordinates: { x, y: y + window.scrollY } } : { coordinates: { x, y: y + window.scrollY }, placement: { x, y: y + window.scrollY } };
             updateShip(id, updatedShip);
 
         }
     }, [shipBlockDimensions, isEditMode, boardSquaresIds]);
-    
+
 
     useEffect(() => {
-            if (window.innerWidth < 620) {
+        if (window.innerWidth < 620) {
 
-                const gameBoard = gameBoardRef.current as HTMLTableElement;
-                const firstBoardSquareId = boardSquaresIds[0];
-                const td = gameBoard.querySelectorAll("td").item(firstBoardSquareId);
-                const { x, y } = td.getBoundingClientRect();
-                updateShip(id, { coordinates: { x, y: y + window.scrollY } });
-            }
-        
+            const gameBoard = gameBoardRef.current as HTMLTableElement;
+            const firstBoardSquareId = boardSquaresIds[0];
+            const td = gameBoard.querySelectorAll("td").item(firstBoardSquareId);
+            const { x, y } = td.getBoundingClientRect();
+            updateShip(id, { coordinates: { x, y: y + window.scrollY } });
+        }
+
     }, [isGameStarted])
 
 
@@ -81,8 +82,6 @@ export default function Ship({ id, shipSize, isGameStarted, isEditMode, shipCoor
         setShipDimensions({ width, height })
     }, [isRotated, shipBlockDimensions.width, shipBlockDimensions.height])
 
-
-    //TODO: should be optimizate
     useEffect(() => {
         if (!isDraggable) return;
 
@@ -90,21 +89,11 @@ export default function Ship({ id, shipSize, isGameStarted, isEditMode, shipCoor
         const { shiftX, shiftY } = mouseShifts;
 
         let type: keyof DocumentEventMap = isTouchDevice ? "touchmove" : "mousemove";
-        const onMouseMoveHandler = (event: MouseEvent | TouchEvent) => {
+        const onMouseOrTouchMoveHandler = (event: MouseEvent | TouchEvent) => {
             event.preventDefault();
             if (isPositionOnBoardConfirmed) setIsPositionOnBoardConfirmed(false);
             shipElement.hidden = true;
-            let pageX = 0;
-            let pageY = 0;
-
-            if (event instanceof MouseEvent) {
-                pageX = event.pageX;
-                pageY = event.pageY;
-            }
-            if (event instanceof TouchEvent) {
-                pageX = event.touches[0].pageX;
-                pageY = event.touches[0].pageY;
-            }
+            const { pageX, pageY } = getEventPageCoordinates(event);
             const targetElement = document.elementFromPoint(
                 pageX - shiftX + shipBlockDimensions.width / 2,
                 pageY - shiftY + shipBlockDimensions.height / 2 - window.scrollY
@@ -147,7 +136,7 @@ export default function Ship({ id, shipSize, isGameStarted, isEditMode, shipCoor
                 // if position is available we change state of isPositionOnBoardFound but dont confirm it
                 if (!isUnavailablePosition) {
                     setIsPositionOnBoardFound(true);
-                    updateShip(id, { coordinates: { x: tdLeft, y: tdTop + window.scrollY } })
+                    updateShip(id, { coordinates: { x: tdLeft, y: tdTop + window.scrollY } }); 
 
                     shipElement.hidden = false;
                     return;
@@ -164,10 +153,10 @@ export default function Ship({ id, shipSize, isGameStarted, isEditMode, shipCoor
             updateShip(id, { coordinates: { x, y } })
         };
 
-        document.addEventListener(type, onMouseMoveHandler, { passive: false });
+        document.addEventListener(type, onMouseOrTouchMoveHandler, { passive: false });
 
         return () => {
-            document.removeEventListener(isTouchDevice ? "touchmove" : "mousemove", onMouseMoveHandler);
+            document.removeEventListener(isTouchDevice ? "touchmove" : "mousemove", onMouseOrTouchMoveHandler);
         };
     }, [isDraggable]);
 
@@ -176,20 +165,10 @@ export default function Ship({ id, shipSize, isGameStarted, isEditMode, shipCoor
         classes.push("ship-place-found");
     }
 
-    const onMouseDownHandler = !isGameStarted ? (event: TouchOrClickEvent) => {
+    const onMouseOrTouchDownHandler = !isGameStarted ? (event: TouchOrClickEvent) => {
         const shipElement = shipRef.current as HTMLDivElement;
         const { top, left } = shipElement.getBoundingClientRect();
-        let pageX = 0;
-        let pageY = 0;
-
-        if (event.nativeEvent instanceof MouseEvent) {
-            pageX = event.nativeEvent.pageX;
-            pageY = event.nativeEvent.pageY;
-        }
-        if (event.nativeEvent instanceof TouchEvent) {
-            pageX = event.nativeEvent.touches[0].pageX;
-            pageY = event.nativeEvent.touches[0].pageY;
-        }
+        const { pageX, pageY } = getEventPageCoordinates(event.nativeEvent);
         const shiftX = pageX - left;
         const shiftY = pageY - top - window.scrollY;
         setMouseShifts({ shiftX, shiftY });
@@ -197,7 +176,7 @@ export default function Ship({ id, shipSize, isGameStarted, isEditMode, shipCoor
 
     } : undefined;
 
-    const onMouseUpHandler = !isGameStarted ? (event: TouchOrClickEvent) => {
+    const onMouseOrTouchUpHandler = !isGameStarted ? (event: TouchOrClickEvent) => {
         setIsDraggable(false);
         //if ship is placed on board then mouse up  should  rotate it
         if (isPositionOnBoardConfirmed) {
@@ -239,6 +218,9 @@ export default function Ship({ id, shipSize, isGameStarted, isEditMode, shipCoor
         //if position is not available or mouse pointer is not on board then return ship to placement
         if (!isPositionOnBoardFound) {
             updateShip(id, { coordinates: { ...shipPlacements }, isRotated: isEditMode ? false : isRotated, boardSquaresIds: isEditMode ? [] : [...boardSquaresIds] })
+            if(!isEditMode){
+                setIsPositionOnBoardConfirmed(true);
+            }
             return;
         }
         //if is edit mode off then return ship to its last placement on board;
@@ -274,10 +256,10 @@ export default function Ship({ id, shipSize, isGameStarted, isEditMode, shipCoor
 
         isTouchDevice
             ?
-            <div ref={shipRef} onTouchStart={onMouseDownHandler} onTouchEnd={onMouseUpHandler} className={classes.join(" ")} style={{ width: + shipDimensions.width + "px", height: shipDimensions.height + "px", top: shipCoordinates.y, left: shipCoordinates.x }}>
+            <div ref={shipRef} onTouchStart={onMouseOrTouchDownHandler} onTouchEnd={onMouseOrTouchUpHandler} className={classes.join(" ")} style={{ width: + shipDimensions.width + "px", height: shipDimensions.height + "px", top: shipCoordinates.y, left: shipCoordinates.x }}>
             </div>
             :
-            <div ref={shipRef} onMouseDown={onMouseDownHandler} onMouseUp={onMouseUpHandler} className={classes.join(" ")} style={{ width: shipDimensions.width + "px", height: shipDimensions.height + "px", top: shipCoordinates.y, left: shipCoordinates.x }}>
+            <div ref={shipRef} onMouseDown={onMouseOrTouchDownHandler} onMouseUp={onMouseOrTouchUpHandler} className={classes.join(" ")} style={{ width: shipDimensions.width + "px", height: shipDimensions.height + "px", top: shipCoordinates.y, left: shipCoordinates.x }}>
             </div>
     )
 }

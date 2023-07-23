@@ -5,16 +5,16 @@ import { LoginData } from '../../../../types/UserData';
 import Button from '../../../UI/Button/Button';
 import { LoginFormErrors } from '../../../../types/UserFormsErrors';
 import UserService from '../../../../services/UserService';
-import User from '../../../../types/User';
 import { AxiosError } from 'axios';
+import { useUserContext } from '../../../../contexts/userContext';
 
 type Props = {
     isLoginModalVisible: boolean,
     setLoading:React.Dispatch<React.SetStateAction<boolean>>,
-    setUser: React.Dispatch<React.SetStateAction<User | null>>,
     setIsLoginModalVisible: React.Dispatch<React.SetStateAction<boolean>>
 }
-export default function LoginModal({ isLoginModalVisible, setUser, setLoading, setIsLoginModalVisible }: Props) {
+export default function LoginModal({ isLoginModalVisible, setLoading, setIsLoginModalVisible }: Props) {
+    const {setUser} = useUserContext();
     const [loginData, setLoginData] = useState<LoginData>({ email: "", password: "" })
     const [errors, setErrors] = useState<LoginFormErrors>({ email: "", password: "", server: "" })
 
