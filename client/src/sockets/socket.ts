@@ -1,5 +1,7 @@
-import { io } from "socket.io-client";
+import { ManagerOptions, SocketOptions, io } from "socket.io-client";
 
-const socket = io("http://localhost:5000");
 
-export default socket;
+export default function getSocket(opt?: Partial<ManagerOptions & SocketOptions>) {
+    const socket = io("http://localhost:5000", opt);
+    return socket;
+}

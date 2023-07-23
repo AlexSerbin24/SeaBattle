@@ -43,8 +43,8 @@ export default function RegisterModal({ isRegisterModalVisible, setUser, setLoad
             setUser(user);
             setIsRegisterModalVisible(false);
         } catch (error) {
-            const axiosError = error as AxiosError;
-            const message = axiosError.response?.data as string;
+            const axiosError = error as AxiosError<{message:string}>;
+            const message = axiosError.response?.data.message as string;
             setErrors(prevErrors => ({ ...prevErrors, server:message }));
         }
         finally{

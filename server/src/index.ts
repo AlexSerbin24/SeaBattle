@@ -7,14 +7,17 @@ import cors from "cors";
 import websocketSetup from "./websockets/websocketSetup.js";
 import connectToDb from "./config/db.js";
 import userRouter from "./routes/userRoutes.js";
+import { apiErrorMiddleware } from "./middleware/errorMiddleware.js";
 
 dotenv.config();
 
 const app = express();
-app.use(bodyParser.json())
+app.use(bodyParser.json());
 app.use(cookieParser());
-app.use(cors({credentials:true, origin:"http://localhost:3000"}))
+app.use(cors({credentials:true, origin:"http://localhost:3000"}));
 app.use("/user", userRouter);
+app.use(apiErrorMiddleware);
+
 const server = http.createServer(app);
 
 

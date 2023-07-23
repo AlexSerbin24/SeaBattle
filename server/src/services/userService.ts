@@ -3,6 +3,7 @@ import User from "../models/user.js";
 import bcrypt from "bcrypt";
 import TokenService from "./tokenService.js";
 import { Op, Sequelize } from "sequelize";
+import ApiError from "../types/errors/ApiError.js";
 
 export default class UserService {
     static async register(registerData: Omit<UserData, "trophies">) {
@@ -16,7 +17,7 @@ export default class UserService {
             }
         });
         if (user) {
-            throw new Error("User is already existed. Change email or user name");
+            throw ApiError.BadRequest("User is already existed. Change email or user name");
         }
 
 
@@ -25,7 +26,6 @@ export default class UserService {
 
         const userData = { email: newUser.email, username: newUser.username, trophies: newUser.trophies };
         const tokens = TokenService.generateTokens(userData);
-        console.log(tokens);
         await TokenService.saveToken(newUser.id, tokens.refreshToken);
         return { ...tokens, ...userData }
 
@@ -34,12 +34,12 @@ export default class UserService {
     static async login(loginData: Omit<UserData, "trophies" | "username">) {
         const user = await User.findOne({ where: { email: loginData.email } });
         if (!user) {
-            throw new Error("User is not existed");
+            throw ApiError.BadRequest("User is not existed");
         }
 
         const isPasswordCorrect = await bcrypt.compare(loginData.password, user.password);
         if (!isPasswordCorrect) {
-            throw (new Error("Password is incorrect"));
+            throw  ApiError.BadRequest("Password is incorrect");
         }
 
         const userData = { email: user.email, username: user.username, trophies: user.trophies };
@@ -54,24 +54,25 @@ export default class UserService {
 
     static async refresh(refreshToken: string) {
         if (!refreshToken) {
-            throw new Error("Unauthorized");
+            throw ApiError.Unauthorized();
         }
 
         const tokenData = TokenService.validateRefreshToken(refreshToken) as Omit<UserData, "password">;
 
         if (!tokenData) {
-            throw new Error("Unauthorized");
+            throw ApiError.Unauthorized();
         }
 
         const user = await User.findOne({ where: { email: tokenData.email } });
 
         if (!user) {
-            throw new Error("Something happened with user account...");
+            throw ApiError.BadRequest("Something happened with user account...");
         }
 
         const userData = { email: user.email, username: user.username, trophies: user.trophies };
 
         const tokens = TokenService.generateTokens(userData);
+        console.log(tokens)
         await TokenService.saveToken(user.id, tokens.refreshToken);
         return { ...tokens, ...userData }
     }

@@ -13,13 +13,14 @@ import PlayerBoard from './components/GameBoard/components/PlayerBoard/PlayerBoa
 import GameOptions from '../../types/GameOptions';
 import PlayerStatus from './components/PlayerStatus/PlayerStatus';
 import WaitingOpponentMove from './components/WaitingOpponentMove/WaitingOpponentMove';
+import { useUserContext } from '../../contexts/userContext';
 
 export default function MainContent() {
   const [loading, setLoading] = useState(false);
   const [isRegisterModalVisible, setIsRegisterModalVisible] = useState(false);
   const [isLoginModalVisible, setIsLoginModalVisible] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
+  const {user, setUser }= useUserContext()
 
   const defaultGameOptions: GameOptions = {
     room: "",
@@ -27,7 +28,7 @@ export default function MainContent() {
     opponent: "Bot",
     opponentTrophies: 0,
     type: "singleplayer",
-    winner:"",
+    winner: "",
   }
 
   const [game, setGame] = useState<Game>({ isGameStarted: false, isGameFinished: false, gameOptions: defaultGameOptions });
@@ -54,7 +55,7 @@ export default function MainContent() {
    * @param userTrophies New user trophies value. For unauthorized user is 0
    * @param opponentTrophies New opponent trophies value. Default opponent is bot so default trophies value is 0
    */
-  const finishGame = (winner:string,userTrophies: number = user?.trophies ?? 0, opponentTrophies: number = 0) => {
+  const finishGame = (winner: string, userTrophies: number = user?.trophies ?? 0, opponentTrophies: number = 0) => {
     if (game.gameOptions.type == "multiplayer") {
       setUser(prevState => {
         const userState = { ...prevState as User };
@@ -86,10 +87,7 @@ export default function MainContent() {
         const { accessToken, ...user } = data;
         localStorage.setItem("token", accessToken);
         setUser(user);
-      })
-      .catch((error: AxiosError) =>
-        console.log(error) /*TODO: handle exception*/
-      );
+      });
   }, []);
 
   //Game finish useEffect
@@ -140,10 +138,10 @@ export default function MainContent() {
         {/* Show current player or winner */}
         {game.isGameStarted ?
 
-          <PlayerStatus 
-          isGameFinished={game.isGameFinished} 
-          currentPlayer={game.gameOptions?.currentPlayer as string}
-          winner = {game.gameOptions?.winner as string} />
+          <PlayerStatus
+            isGameFinished={game.isGameFinished}
+            currentPlayer={game.gameOptions?.currentPlayer as string}
+            winner={game.gameOptions?.winner as string} />
           :
           <h3 style={{ textAlign: "center" }}>Place your ships</h3>
         }

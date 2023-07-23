@@ -4,14 +4,14 @@ import User from '../../../../types/User'
 import UserService from '../../../../services/UserService';
 import useSocket from '../../../../hooks/useSocket';
 import GameOptions from '../../../../types/GameOptions';
-import Game from '../../../../types/Game';
+import Modal from '../../../UI/Modal/Modal';
 
 type Props = {
     isEditMode: boolean,
     user: User | null,
     setLoading: React.Dispatch<React.SetStateAction<boolean>>,
     setUser: React.Dispatch<React.SetStateAction<User | null>>,
-    startGame: (gameOptions?: GameOptions) => void
+    startGame: (gameOptions?: GameOptions) => void,
     setIsLoginModalVisible: React.Dispatch<React.SetStateAction<boolean>>,
     setIsRegisterModalVisible: React.Dispatch<React.SetStateAction<boolean>>
 };
@@ -19,6 +19,7 @@ type Props = {
 export default function Menu({ user, isEditMode, setUser, setLoading, startGame, setIsLoginModalVisible, setIsRegisterModalVisible }: Props) {
     const webSocket = useSocket();
     const [currentUserOnlineCount, setCurrentUserOnlineCount] = useState(0);
+    const [errorModal, setErrorModal] = useState(false);
 
     const singleplayerButtonClickHandler = (event: React.MouseEvent) => {
         startGame();
@@ -32,6 +33,7 @@ export default function Menu({ user, isEditMode, setUser, setLoading, startGame,
         setIsRegisterModalVisible(true)
     }
 
+
     useEffect(() => {
         function giveUserOnlineCount(userOnlineCount: number) {
             setCurrentUserOnlineCount(userOnlineCount);
@@ -40,16 +42,29 @@ export default function Menu({ user, isEditMode, setUser, setLoading, startGame,
             startGame(gameOptions);
             setLoading(false);
         }
+        async function invalidToken() {
+            try {
+                const { accessToken } =  await UserService.refresh();
+                localStorage.setItem("token", accessToken);
+                webSocket.sendMessage("search opponent:searching", { username: user?.username, trophies: user?.trophies });
+            } catch (error) {
+                setUser(null);
+                setLoading(false);
+                setErrorModal(true);
+            }
+        }
         webSocket.onMessage("user online:give user online count", giveUserOnlineCount);
         webSocket.onMessage("search opponent:opponent found", opponentFound);
+        webSocket.onMessage("search opponent:invalid token", invalidToken);
 
         webSocket.sendMessage("user online:give user online count");
 
         return () => {
             webSocket.offMessage("user online:give user online count", giveUserOnlineCount);
             webSocket.offMessage("search opponent:opponent found", opponentFound);
+            webSocket.offMessage("search opponent:invalid token", invalidToken);
         }
-    }, [])
+    }, [webSocket])
 
 
     const toBattleButtonClickHandler = (event: React.MouseEvent) => {
@@ -59,20 +74,18 @@ export default function Menu({ user, isEditMode, setUser, setLoading, startGame,
 
     const logoutButtonClickHandler = async (event: React.MouseEvent) => {
         setLoading(true);
-        try {
-            await UserService.logout();
-            localStorage.removeItem("token");
-            setUser(null);
-        } catch (error) {
-            console.log(error) //TODO: handle exception in logout
-        }
-        finally {
-            setLoading(false);
-        }
+        await UserService.logout();
+        localStorage.removeItem("token");
+        setUser(null);
+        setLoading(false);
     }
 
     return (
         <div className='menu'>
+            <Modal title='Error' isVisible={errorModal} setModal={setErrorModal}>
+                <h3 style={{ textAlign: "center"}}>You are not authrorized or internet connection is lost.</h3>
+            </Modal>
+
             <Button onClick={singleplayerButtonClickHandler} disabled={isEditMode} className='singleplayer-btn'>Play with bot</Button>
             {
                 user

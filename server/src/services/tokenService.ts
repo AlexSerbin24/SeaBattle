@@ -14,13 +14,14 @@ export default class TokenService{
         const tokenData = await Token.findOne({where:{userId}});
         if(tokenData){
             tokenData.refreshToken=refreshToken;
-            return await tokenData.save()
+            await tokenData.save();
+            return
         }
         return await Token.create({userId,refreshToken});
     }
 
-    static async removeToken(token:string){
-        const tokenData = await Token.destroy({where:{refreshToken:token}});
+    static async removeToken(refreshToken:string){
+        const tokenData = await Token.destroy({where:{refreshToken}});
         return tokenData;
     }
 

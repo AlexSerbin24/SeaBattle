@@ -40,8 +40,8 @@ export default function LoginModal({ isLoginModalVisible, setUser, setLoading, s
             setUser(user);
             setIsLoginModalVisible(false);
         } catch (error) {
-            const axiosError = error as AxiosError;
-            const message = axiosError.response?.data as string;
+            const axiosError = error as AxiosError<{message:string}>;
+            const message = axiosError.response?.data.message as string;
             setErrors(prevErrors => ({ ...prevErrors, server:message }));
         }
         finally{
