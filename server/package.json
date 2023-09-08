@@ -4,10 +4,9 @@
   "description": "This is server side of \"Sea battle\" application",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon --esm src/index.ts",
+    "dev": "nodemon src/index.ts",
     "build": "tsc"
   },
-  "type": "module",
   "author": "Alex24",
   "license": "ISC",
   "devDependencies": {

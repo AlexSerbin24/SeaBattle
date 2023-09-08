@@ -1,6 +1,6 @@
-import { sequelize } from "../config/db.js";
+import { sequelize } from "../config/db";
 import { DataTypes, Model, CreationOptional, ForeignKey} from "sequelize";
-import User from "./user.js";
+import User from "./user";
 
 
 class Token extends Model{

@@ -4,10 +4,10 @@ import dotenv from "dotenv"
 import cookieParser from "cookie-parser";
 import bodyParser from "body-parser";
 import cors from "cors";
-import websocketSetup from "./websockets/websocketSetup.js";
-import connectToDb from "./config/db.js";
-import userRouter from "./routes/userRoutes.js";
-import { apiErrorMiddleware } from "./middleware/errorMiddleware.js";
+import websocketSetup from "./websockets/websocketSetup";
+import connectToDb from "./config/db";
+import userRouter from "./routes/userRoutes";
+import { apiErrorMiddleware } from "./middleware/errorMiddleware";
 
 dotenv.config();
 

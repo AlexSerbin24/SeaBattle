@@ -1,9 +1,9 @@
 import http from "http";
 import { Server } from "socket.io";
-import registerSearchPlayerHandlers from "./handlers/searchPlayerHandler.js";
-import registerGameHandlers from "./handlers/gameHandlers.js";
-import SearchUserService from "../services/searchService.js";
-import TokenService from "../services/tokenService.js";
+import registerSearchPlayerHandlers from "./handlers/searchPlayerHandler";
+import registerGameHandlers from "./handlers/gameHandlers";
+import SearchUserService from "../services/searchService";
+import TokenService from "../services/tokenService";
 
 export default function websocketSetup(server: http.Server) {
     let userOnlineCount = 0;

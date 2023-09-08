@@ -1,4 +1,4 @@
-import ApiError from "../types/errors/ApiError.js";
+import ApiError from "../types/errors/ApiError";
 import { Request,Response,NextFunction } from "express";
 
 export function apiErrorMiddleware(err:Error, req:Request, res:Response, next:NextFunction){

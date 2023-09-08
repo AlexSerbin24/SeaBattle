@@ -1,6 +1,6 @@
-import SearchUser from "../models/searchUser.js";
+import SearchUser from "../models/searchUser";
 import { Op } from "sequelize";
-import SearchUserData from "../types/searchUserData.js";
+import SearchUserData from "../types/searchUserData";
 
 export default class SearchUserService {
     static async findSuitableOpponent(trophies: number): Promise<SearchUserData | null> {

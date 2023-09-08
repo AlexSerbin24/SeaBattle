@@ -1,7 +1,7 @@
 import { Server, Socket } from "socket.io";
-import SearchUserService from "../../services/searchService.js";
-import SearchUserData from "../../types/searchUserData.js";
-import TokenService from "../../services/tokenService.js";
+import SearchUserService from "../../services/searchService";
+import SearchUserData from "../../types/searchUserData";
+import TokenService from "../../services/tokenService";
 
 export default function registerSearchPlayerHandlers(io: Server, socket: Socket) {
     socket.on("search opponent:searching", async ({username, trophies}: Omit<SearchUserData, "socketId">) => {

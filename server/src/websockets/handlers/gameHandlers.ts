@@ -1,5 +1,5 @@
 import { Server, Socket } from "socket.io";
-import UserService from "../../services/userService.js";
+import UserService from "../../services/userService";
 
 export default function registerGameHandlers(io: Server, socket: Socket) {
     // socket.on("game:player ready", (room: string, username: string) => {

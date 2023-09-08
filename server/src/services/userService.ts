@@ -1,9 +1,9 @@
-import UserData from "../types/userData.js";
-import User from "../models/user.js";
+import UserData from "../types/userData";
+import User from "../models/user";
 import bcrypt from "bcrypt";
-import TokenService from "./tokenService.js";
+import TokenService from "./tokenService";
 import { Op, Sequelize } from "sequelize";
-import ApiError from "../types/errors/ApiError.js";
+import ApiError from "../types/errors/ApiError";
 
 export default class UserService {
     static async register(registerData: Omit<UserData, "trophies">) {

@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
-import UserService from "../services/userService.js";
-import UserData from "../types/userData.js";
+import UserService from "../services/userService";
+import UserData from "../types/userData";
 
 export default class UserController {
     static async login(req: Request, res: Response, next:NextFunction) {

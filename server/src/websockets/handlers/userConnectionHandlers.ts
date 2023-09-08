@@ -1,5 +1,5 @@
 // import { Server, Socket } from "socket.io";
-// import SearchUserService from "../../services/searchService.js";
+// import SearchUserService from "../../services/searchService";
 
 // export default function registerUserOnlineHandler(io: Server, socket: Socket) {
 //     let userOnlineCount = 0
