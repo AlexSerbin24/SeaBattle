@@ -1,2 +1,10 @@
 node_modules
 dist
+.env
+.env.aws
+
+# Elastic Beanstalk Files
+
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml

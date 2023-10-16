@@ -1,6 +1,6 @@
 import axios from "axios"
 const axiosInstance = axios.create({
-    baseURL:"http://localhost:5000",
+    baseURL:"http://sea-battle4308.eu-north-1.elasticbeanstalk.com",
     withCredentials:true
 })
 
