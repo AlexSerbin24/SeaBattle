@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react'
 import Button from '../../../UI/Button/Button'
-import User from '../../../../types/User'
 import UserService from '../../../../services/UserService';
 import useSocket from '../../../../hooks/useSocket';
 import GameOptions from '../../../../types/GameOptions';
-import Modal from '../../../UI/Modal/Modal';
 import { useUserContext } from '../../../../contexts/userContext';
+import { AxiosError } from 'axios';
+import ErrorModal from '../Modals/ErrorModal';
 
 type Props = {
     isEditMode: boolean,
@@ -15,11 +15,11 @@ type Props = {
     setIsRegisterModalVisible: React.Dispatch<React.SetStateAction<boolean>>
 };
 
-export default function Menu({isEditMode, setLoading, startGame, setIsLoginModalVisible, setIsRegisterModalVisible }: Props) {
-    const{user,setUser} = useUserContext();
+export default function Menu({ isEditMode, setLoading, startGame, setIsLoginModalVisible, setIsRegisterModalVisible }: Props) {
+    const { user, setUser } = useUserContext();
     const webSocket = useSocket();
-    const [currentUserOnlineCount, setCurrentUserOnlineCount] = useState(0);
     const [errorModal, setErrorModal] = useState(false);
+    const [errorText, setErrorText] = useState("")
 
     const singleplayerButtonClickHandler = (event: React.MouseEvent) => {
         startGame();
@@ -35,34 +35,44 @@ export default function Menu({isEditMode, setLoading, startGame, setIsLoginModal
 
 
     useEffect(() => {
-        function giveUserOnlineCount(userOnlineCount: number) {
-            setCurrentUserOnlineCount(userOnlineCount);
-        }
+
         function opponentFound(gameOptions: GameOptions) {
             startGame(gameOptions);
             setLoading(false);
         }
+
         async function invalidToken() {
             try {
-                const { accessToken } =  await UserService.refresh();
+                const { accessToken } = await UserService.refresh();
                 localStorage.setItem("token", accessToken);
                 webSocket.sendMessage("search opponent:searching", { username: user?.username, trophies: user?.trophies });
             } catch (error) {
                 setUser(null);
                 setLoading(false);
+
+                const axiosError = error as AxiosError<{ message: string }>;
+                const message = axiosError.response?.data.message as string;
+
+                setErrorText(message)
                 setErrorModal(true);
             }
         }
-        webSocket.onMessage("user online:give user online count", giveUserOnlineCount);
-        webSocket.onMessage("search opponent:opponent found", opponentFound);
-        webSocket.onMessage("search opponent:invalid token", invalidToken);
 
-        webSocket.sendMessage("user online:give user online count");
+        async function blockSearchError() {
+            setUser(null);
+            setLoading(false);
+            setErrorText("You can not search another game while you are playing")
+            setErrorModal(true);
+        }
+
+        webSocket.onMessage("search opponent:opponent found(client)", opponentFound);
+        webSocket.onMessage("search opponent:invalid token(client)", invalidToken);
+        webSocket.onMessage("search opponent:searching is blocked(client)", blockSearchError);
 
         return () => {
-            webSocket.offMessage("user online:give user online count", giveUserOnlineCount);
-            webSocket.offMessage("search opponent:opponent found", opponentFound);
-            webSocket.offMessage("search opponent:invalid token", invalidToken);
+            webSocket.offMessage("search opponent:opponent found(client)", opponentFound);
+            webSocket.offMessage("search opponent:invalid token(client)", invalidToken);
+            webSocket.offMessage("search opponent:searching is blocked(client)", blockSearchError);
         }
     }, [webSocket])
 
@@ -82,9 +92,7 @@ export default function Menu({isEditMode, setLoading, startGame, setIsLoginModal
 
     return (
         <div className='menu'>
-            <Modal title='Error' isVisible={errorModal} setModal={setErrorModal}>
-                <h3 style={{ textAlign: "center"}}>You are not authrorized or internet connection is lost.</h3>
-            </Modal>
+            <ErrorModal isErrorModalVisible={errorModal} setIsErrorModalVisible={setErrorModal} errorMessage={errorText} />
 
             <Button onClick={singleplayerButtonClickHandler} disabled={isEditMode} className='singleplayer-btn'>Play with bot</Button>
             {
@@ -101,8 +109,6 @@ export default function Menu({isEditMode, setLoading, startGame, setIsLoginModal
                     </>
 
             }
-
-            <h3>Players online: {currentUserOnlineCount}</h3>
         </div>
     )
 }

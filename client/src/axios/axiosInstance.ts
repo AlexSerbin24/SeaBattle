@@ -1,6 +1,8 @@
 import axios from "axios"
+import { API_URL } from "../config/config";
+
 const axiosInstance = axios.create({
-    baseURL:"http://sea-battle4308.eu-north-1.elasticbeanstalk.com",
+    baseURL:API_URL,
     withCredentials:true
 })
 

@@ -10,11 +10,11 @@ import { useUserContext } from '../../../../contexts/userContext';
 
 type Props = {
     isLoginModalVisible: boolean,
-    setLoading:React.Dispatch<React.SetStateAction<boolean>>,
+    setLoading: React.Dispatch<React.SetStateAction<boolean>>,
     setIsLoginModalVisible: React.Dispatch<React.SetStateAction<boolean>>
 }
 export default function LoginModal({ isLoginModalVisible, setLoading, setIsLoginModalVisible }: Props) {
-    const {setUser} = useUserContext();
+    const { setUser } = useUserContext();
     const [loginData, setLoginData] = useState<LoginData>({ email: "", password: "" })
     const [errors, setErrors] = useState<LoginFormErrors>({ email: "", password: "", server: "" })
 
@@ -35,23 +35,29 @@ export default function LoginModal({ isLoginModalVisible, setLoading, setIsLogin
         }
         try {
             const response = await UserService.login(loginData);
-            const {accessToken, ...user} = response;
+            const { accessToken, ...user } = response;
             localStorage.setItem("token", accessToken);
             setUser(user);
             setIsLoginModalVisible(false);
         } catch (error) {
-            const axiosError = error as AxiosError<{message:string}>;
-            const message = axiosError.response?.data.message as string;
-            setErrors(prevErrors => ({ ...prevErrors, server:message }));
+            const axiosError = error as AxiosError<{ message: string }>;
+            const message = axiosError.code == "ERR_NETWORK"
+                ?
+                "There are some problems here. Check your network connection or wait for a while"
+                :
+                axiosError.response?.data.message as string;
+                
+            setErrors(prevErrors => ({ ...prevErrors, server: message }));
+
         }
-        finally{
+        finally {
             setLoading(false);
         }
     }
     return (
         <Modal title='Login' isVisible={isLoginModalVisible} setModal={setIsLoginModalVisible}>
             <form onSubmit={submitLoginForm} className='user-form'>
-                <div style={{marginBottom:15}}><span className='error'>{errors.server}</span></div>
+                <div style={{ marginBottom: 15, textAlign: "center" }}><span className='error'>{errors.server}</span></div>
                 <label>
                     <span>Email:</span>
                     <Input value={loginData.email} onChange={(event) => setLoginData({ ...loginData, email: event.target.value })} type='text' />

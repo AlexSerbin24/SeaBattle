@@ -1,0 +1,1 @@
+export const API_URL = "https://seabattle4308-env.eba-z3dtexqm.eu-north-1.elasticbeanstalk.com";

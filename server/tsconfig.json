@@ -2,12 +2,12 @@
   "compilerOptions": {
     "target": "es6",
     "module": "NodeNext",
-    "outDir": "./dist",
+    "outDir": "dist",
     "rootDir": "./src",
     "esModuleInterop": true,
     "strict": true,
   },
 
-  "include": ["src/**/*.ts"],
+  "include": ["src/**/*.ts","src/**/*.pem"],
   "exclude": ["node_modules"]
 }

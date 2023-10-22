@@ -19,7 +19,7 @@
   "noEmit": false,
   "jsx": "react-jsx",
   "sourceMap": true,
-  "declaration": true,
+  "declaration": false,
   "incremental": true,
   "noFallthroughCasesInSwitch": true
   },

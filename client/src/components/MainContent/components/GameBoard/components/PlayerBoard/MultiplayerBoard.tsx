@@ -19,7 +19,7 @@ type Props = {
 }
 
 
-export default forwardRef(function MultiplayerBoard({ isGameFinished, gameOptions, boardSquares, username, trophies, handleOpponentMove, checkGameStatus, changeCurrentPlayer, finishGame }: Props, ref: ForwardedRef<HTMLTableElement>) {
+export default forwardRef(function MultiplayerBoard({isGameFinished, gameOptions, boardSquares, username, trophies, handleOpponentMove, checkGameStatus, changeCurrentPlayer, finishGame }: Props, ref: ForwardedRef<HTMLTableElement>) {
     const socket = useSocket();
     useEffect(() => {
         const changingCurrentPlayer = (nextMovePlayer: string) => {
@@ -39,7 +39,7 @@ export default forwardRef(function MultiplayerBoard({ isGameFinished, gameOption
 
         const opponentMove = (borderSquareId: number) => {
             const { isHit, hittedBoardSquares, boardSquaresIdsAroundShip } = handleOpponentMove(borderSquareId);
-
+            
             const { room, currentPlayer, opponentTrophies } = gameOptions;
             // Notify the opponent that the move has finished
             socket.sendMessage("game:player move finished", room, borderSquareId, isHit, boardSquaresIdsAroundShip);
@@ -47,31 +47,28 @@ export default forwardRef(function MultiplayerBoard({ isGameFinished, gameOption
             checkGameStatus(hittedBoardSquares,
                 () => socket.sendMessage("game:change current player", room, isHit, currentPlayer, username),
                 () => socket.sendMessage("game:game over", room, currentPlayer, opponentTrophies, username, trophies));
-
-
         }
 
         // Register socket event listener for game events
-        socket.onMessage("game:change current player", changingCurrentPlayer);
-        socket.onMessage("game:game over", gameOver);
+        socket.onMessage("game:change current player(client)", changingCurrentPlayer);
+        socket.onMessage("game:game over(client)", gameOver);
         socket.onMessage("game:player move(client)", opponentMove);
-
         // Clean up the socket event listener when the component unmounts
         return () => {
-            socket.offMessage("game:change current player", changingCurrentPlayer);
-            socket.offMessage("game:game over", gameOver);
+            socket.offMessage("game:change current player(client)", changingCurrentPlayer);
+            socket.offMessage("game:game over(client)", gameOver);
             socket.offMessage("game:player move(client)", opponentMove);
         };
-    }, [gameOptions.currentPlayer, boardSquares])
+    }, [gameOptions.currentPlayer,boardSquares])
 
     useEffect(() => {
-
         if (!isGameFinished) {
-            console.log(gameOptions)
+            
             const beforeUnloadEventHandler = (event: BeforeUnloadEvent) => {
                 const confirmationMessage = `Are you sure you want to leave while game is continuing?`;
                 event.returnValue = confirmationMessage;
             }
+            
             const unloadEventHandler = (event: Event) => {
                 const { room, opponent, opponentTrophies } = gameOptions;
 
@@ -79,6 +76,7 @@ export default forwardRef(function MultiplayerBoard({ isGameFinished, gameOption
             }
             window.addEventListener("beforeunload", beforeUnloadEventHandler);
             window.addEventListener('unload', unloadEventHandler);
+
             return () => {
                 window.removeEventListener("beforeunload", beforeUnloadEventHandler);
                 window.removeEventListener("unload", unloadEventHandler);

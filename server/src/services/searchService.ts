@@ -16,7 +16,6 @@ export default class SearchUserService {
     }
 
     static async addSearchUser(searchUser: SearchUserData) {
-
         return await SearchUser.create({ ...searchUser });
     }
 
@@ -26,6 +25,12 @@ export default class SearchUserService {
                 socketId
             }
         });
+    }
+
+    static async getUsernameBySocket(socketId: string) {
+        const user = await SearchUser.findOne({ where: { socketId } });
+
+        return user ? user.username : null;
     }
 }
 

@@ -14,9 +14,12 @@ dotenv.config();
 const app = express();
 app.use(bodyParser.json());
 app.use(cookieParser());
-app.use(cors({credentials:true, origin:"http://localhost:3000"}));
+app.use(cors({credentials:true, origin:process.env.FRONTEND_URL}));
 app.use("/user", userRouter);
 app.use(apiErrorMiddleware);
+
+
+  
 
 const server = http.createServer(app);
 
@@ -24,4 +27,5 @@ const server = http.createServer(app);
 websocketSetup(server);
 connectToDb();
 
-server.listen(5000, () => { console.log("server has started") })
+server.listen( process.env.PORT || 5000, () => { console.log("server has started") })
+

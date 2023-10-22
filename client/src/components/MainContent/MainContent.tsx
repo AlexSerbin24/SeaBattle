@@ -13,13 +13,16 @@ import GameOptions from '../../types/GameOptions';
 import PlayerStatus from './components/PlayerStatus/PlayerStatus';
 import WaitingOpponentMove from './components/WaitingOpponentMove/WaitingOpponentMove';
 import { useUserContext } from '../../contexts/userContext';
+import Modal from '../UI/Modal/Modal';
+import { AxiosError } from 'axios';
+import ErrorModal from './components/Modals/ErrorModal';
 
 export default function MainContent() {
   const [loading, setLoading] = useState(false);
   const [isRegisterModalVisible, setIsRegisterModalVisible] = useState(false);
   const [isLoginModalVisible, setIsLoginModalVisible] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
-  const {user, setUser }= useUserContext()
+  const { user, setUser } = useUserContext()
 
   const defaultGameOptions: GameOptions = {
     room: "",
@@ -31,6 +34,8 @@ export default function MainContent() {
   }
 
   const [game, setGame] = useState<Game>({ isGameStarted: false, isGameFinished: false, gameOptions: defaultGameOptions });
+  const [errorModal, setErrorModal] = useState(false);
+  const [errorText, setErrorText] = useState("")
 
   /**
    * Start game. According to game type change game options.
@@ -86,7 +91,20 @@ export default function MainContent() {
         const { accessToken, ...user } = data;
         localStorage.setItem("token", accessToken);
         setUser(user);
-      });
+      })
+      .catch((error) => {
+        const axiosError = error as AxiosError<{ message: string }>;
+        console.log(axiosError)
+        if(axiosError.code=="ERR_NETWORK"){
+          setErrorText("There are some problems here. Check your network connection or wait for a while");
+          setErrorModal(true);
+        }
+        else if (axiosError.response?.status as number != 401) {
+          const message = axiosError.response?.data.message as string;
+          setErrorText(message);
+          setErrorModal(true);
+        }
+      })
   }, []);
 
   //Game finish useEffect
@@ -111,6 +129,12 @@ export default function MainContent() {
   return (
     <Container className='main-container'>
       <Loader loading={loading} />
+
+      <ErrorModal isErrorModalVisible={errorModal} setIsErrorModalVisible={setErrorModal} errorMessage={errorText}/>
+      
+      <Modal title='Error' isVisible={errorModal} setModal={setErrorModal}>
+        <h3 style={{ textAlign: "center" }}>{errorText}</h3>
+      </Modal>
 
       {/* Show WaitingOpponentMove component if the game is in progress and opponent is making his move or game is finished */}
       {game.isGameStarted && (

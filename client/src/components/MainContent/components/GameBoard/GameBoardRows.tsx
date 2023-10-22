@@ -8,11 +8,7 @@ type Props = {
     boardSquareClickHandler?: (id: number) => (event: React.MouseEvent<Element, MouseEvent>) => void
 }
 export default function GameBoardRows({ isGameStarted, boardSquares, boardSquareClickHandler }: Props) {
-    useEffect(() => {
-        
-    }, [boardSquares])
     
- 
     const boardLines = Array.from({ length: 10 }, (r, rowIndex) =>
         <tr key={`row${rowIndex}`} className='board-row'>
             {

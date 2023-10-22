@@ -8,6 +8,7 @@ class User extends Model{
     declare username:string;
     declare password :string;
     declare trophies:number;
+    declare blockSearch:boolean
 };
 
 User.init({
@@ -38,6 +39,11 @@ User.init({
     trophies:{
         type:DataTypes.INTEGER,
         defaultValue:0,
+        allowNull:false
+    },
+    blockSearch:{
+        type:DataTypes.BOOLEAN,
+        defaultValue:false,
         allowNull:false
     }
 }, {sequelize});

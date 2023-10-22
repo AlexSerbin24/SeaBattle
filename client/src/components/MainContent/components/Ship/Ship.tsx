@@ -223,7 +223,7 @@ export default function Ship({ id, shipSize, isGameStarted, isEditMode, shipCoor
             }
             return;
         }
-        //if is edit mode off then return ship to its last placement on board;
+        //if edit mode is off then return ship to its last placement on board;
         if (!isEditMode) {
             updateShip(id, { placement: { ...shipCoordinates } });
         }

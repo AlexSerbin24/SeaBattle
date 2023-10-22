@@ -43,9 +43,14 @@ export default function RegisterModal({ isRegisterModalVisible, setLoading, setI
             setUser(user);
             setIsRegisterModalVisible(false);
         } catch (error) {
-            const axiosError = error as AxiosError<{message:string}>;
-            const message = axiosError.response?.data.message as string;
-            setErrors(prevErrors => ({ ...prevErrors, server:message }));
+            const axiosError = error as AxiosError<{ message: string }>;
+            const message = axiosError.code == "ERR_NETWORK"
+                ?
+                "There are some problems here. Check your network connection or wait for a while"
+                :
+                axiosError.response?.data.message as string;
+                
+            setErrors(prevErrors => ({ ...prevErrors, server: message }));
         }
         finally{
             setLoading(false);
@@ -56,7 +61,7 @@ export default function RegisterModal({ isRegisterModalVisible, setLoading, setI
     return (
         <Modal title='Register' isVisible={isRegisterModalVisible} setModal={setIsRegisterModalVisible}>
             <form onSubmit={submitRegisterForm} className='user-form'>
-                <div style={{ marginBottom: 15 }}><span className='error'>{errors.server}</span></div>
+                <div style={{marginBottom:15, textAlign:"center"}}><span className='error'>{errors.server}</span></div>
                 <label>
                     <span>Email:</span>
                     <Input value={registerData.email} onChange={(event) => setRegisterData({ ...registerData, email: event.target.value })} type='text' />

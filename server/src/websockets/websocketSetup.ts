@@ -3,33 +3,40 @@ import { Server } from "socket.io";
 import registerSearchPlayerHandlers from "./handlers/searchPlayerHandler";
 import registerGameHandlers from "./handlers/gameHandlers";
 import SearchUserService from "../services/searchService";
+import UserService from "../services/userService";
 import TokenService from "../services/tokenService";
 
+/**
+ * Set up WebSocket connections and event handlers.
+ */
 export default function websocketSetup(server: http.Server) {
-    let userOnlineCount = 0;
 
-    const io = new Server(server, { cors: { origin: "http://localhost:3000" } });
+    // Create a new Socket.IO server instance and configure CORS.
+    const io = new Server(server, { cors: { origin: process.env.FRONTEND_URL } });
 
-
+    // Event handler for new client connections.
     io.on('connection', (socket) => {
-        if (socket.handshake.headers.authorization) {
-            userOnlineCount++;
-            io.emit("user online:give user online count", userOnlineCount);
-        }
-        socket.on("user online:give user online count", async () => {
-            io.emit("user online:give user online count", userOnlineCount);
-        });
 
+        // Emit current user online count to the connected client.
+        // Register event handlers for game-related events.
         registerSearchPlayerHandlers(io, socket);
         registerGameHandlers(io, socket);
 
+        // Event handler for client disconnections.
         socket.on("disconnect", async () => {
             if (socket.handshake.headers.authorization) {
-                await SearchUserService.removeSearchUser(socket.id);
-                userOnlineCount--;
-                io.emit("user online:give user online count", userOnlineCount);
-                console.log("Client was disconnected");
+                // Retrieve the username associated with the disconnected socket.
+                const username = await SearchUserService.getUsernameBySocket(socket.id);
+
+                // If a username is found, remove the user from search and update their status.
+                if (username) {
+                    await Promise.all([
+                        SearchUserService.removeSearchUser(socket.id),
+                        UserService.updateUserBlockSearchGame(username, false)
+                    ]);
+                }
+
             }
-        })
-    })
+        });
+    });
 }
