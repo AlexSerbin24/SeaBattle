@@ -32,7 +32,7 @@ export default class UserController {
         try {
             const { refreshToken } = req.cookies;
             await UserService.logout(refreshToken as string);
-            res.clearCookie("refreshToken");
+            res.clearCookie("refreshToken", {httpOnly: true, sameSite: "none", secure: true});
             res.send({ message: "Logout was succeed" })
         } catch (error) {
             next(error);
